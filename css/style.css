@@ -359,46 +359,56 @@ th {
 .btn-delete:hover { opacity: 0.8; }
 
 /* ==============================
-   MEDIA QUERIES RESPONSIVE (CORREGIDO)
+   MEDIA QUERIES - ARREGLO DEFINITIVO
 ============================== */
 @media (max-width: 600px) {
 
+    /* 1. Header: mantenemos logo y total en la misma línea si caben */
     header {
         flex-direction: row; 
         justify-content: space-between;
-        padding: 1rem;
+        padding: 12px;
     }
 
-    header h1, .logo-container { 
-        font-size: 1.2rem; 
-    }
-
+    /* 2. Controles JSON: Forzamos rejilla de 2 columnas */
     .json-controls {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Dos columnas para los botones */
+        grid-template-columns: 1fr 1fr; 
         gap: 10px;
         width: 100%;
     }
 
+    /* Los botones de Importar/Exportar ocupan su celda (1 columna cada uno) */
+    .json-controls .json-btn {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* 3. EL BOTÓN USD/EUR: La clave es "justify-self" para no romper el grid */
     .json-controls .currency-switch {
-        grid-column: span 2; 
-        justify-content: center;
-        background-color: #334155; 
-        width: auto;
+        grid-column: span 2;    /* Ocupa el ancho de las dos columnas de arriba */
+        justify-self: center;   /* SE CENTRA ÉL MISMO sin estirar el fondo */
+        width: auto;            /* Recupera su tamaño natural */
+        min-width: 140px;       /* Evita que se encoja demasiado */
+        padding: 10px 20px;
     }
 
+    /* 4. Formulario: 2 columnas para Activo y Euros */
     #crypto-form {
-        grid-template-columns: 1fr 1fr; /* Dos columnas en móvil también */
+        grid-template-columns: 1fr 1fr;
     }
 
-    /* El botón "Añadir" y el primer input (fecha) ocupan toda la fila */
+    /* Fecha y Botón Añadir ocupan todo el ancho (2 columnas) */
     #crypto-form input[type="date"],
     #crypto-form button {
         grid-column: span 2;
+        width: 100%;
     }
 
+    /* 5. Tabla: Scroll lateral limpio */
     .table-wrapper {
-        margin: 0 -15px; /* Aprovecha los bordes del móvil */
+        margin: 0 -15px;
         border-radius: 0;
+        width: calc(100% + 30px);
     }
 }
