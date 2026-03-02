@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CryptoTrace - Gestión de Activos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1 id="theme-toggle" style="cursor: pointer;">CryptoTrace 🌓</h1>
+        <div class="header-controls">
+            <div class="total-box">
+                <span>Inversión Total:</span>
+                <strong id="total-general">0.00 €</strong>
+            </div>
+            <div class="currency-switch">
+                <span>EUR</span>
+                <label class="switch">
+                    <input type="checkbox" id="currency-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>USD</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Sección de Formulario -->
+        <section class="form-container">
+            <form id="crypto-form">
+                <input type="date" id="input-fecha" required>
+                <input type="text" id="input-moneda" placeholder="Activo" required>
+                <input type="number" id="input-euros" placeholder="Euros invertidos" step="0.01" required>
+                <input type="number" id="input-cantidad" placeholder="Cantidad recibida" step="0.000001" required>
+                <button type="submit">Añadir</button>
+            </form>
+        </section>
+
+        <!-- Tabla Responsive -->
+        <section class="table-wrapper">
+            <table id="main-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Moneda</th>
+                        <th>Inversión</th>
+                        <th>Cantidad</th>
+                        <th>Precio/U</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- JS inyectará las filas aquí -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
