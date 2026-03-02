@@ -16,17 +16,15 @@
 
     <header>
         <h1 id="theme-toggle" style="cursor: pointer; user-select: none;">🌓 CryptoTrace</h1>
-        <div class="header-controls">
-            <div class="total-box">
-                <span>Inversión Total:</span>
-                <strong id="total-general">0.00 €</strong>
-            </div>
-        </div>
-    </header>
+        </header>
 
     <main>
-
-        <div class="json-controls">
+        <div class="total-box">
+                <span><h2>Inversión Total:</h2></span>
+                <h2><strong id="total-general">0.00 €</strong></h2>
+            </div>
+            <br>
+            <div class="json-controls">
             <button id="import-btn" class="json-btn json-import">📂 Importar Datos</button>
             <input type="file" id="import-json" accept=".json" style="display:none;">
             <button id="export-json" class="json-btn json-export">💾 Exportar Datos</button>
@@ -81,4 +79,3 @@
     <script src="js/app.js"></script>
 </body>
 </html>
-
