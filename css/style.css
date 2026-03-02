@@ -359,18 +359,22 @@ th {
 .btn-delete:hover { opacity: 0.8; }
 
 /* ==============================
-   MEDIA QUERIES - ARREGLO DEFINITIVO
+   MEDIA QUERIES RESPONSIVE (SOLO CAMBIAR ESTO)
 ============================== */
 @media (max-width: 600px) {
 
-    /* 1. Header: mantenemos logo y total en la misma línea si caben */
+    /* Header: mantenemos logo y total en la misma línea si caben */
     header {
         flex-direction: row; 
         justify-content: space-between;
-        padding: 12px;
+        padding: 1rem;
     }
 
-    /* 2. Controles JSON: Forzamos rejilla de 2 columnas */
+    header h1, .logo-container { 
+        font-size: 1.2rem; 
+    }
+
+    /* JSON Controls: Rejilla para móvil */
     .json-controls {
         display: grid;
         grid-template-columns: 1fr 1fr; 
@@ -378,36 +382,30 @@ th {
         width: 100%;
     }
 
-    /* Los botones de Importar/Exportar ocupan su celda (1 columna cada uno) */
-    .json-controls .json-btn {
-        width: 100%;
-        margin: 0;
-    }
-
-    /* 3. EL BOTÓN USD/EUR: La clave es "justify-self" para no romper el grid */
+    /* EL BOTÓN USD/EUR: Se centra sin romper el fondo */
     .json-controls .currency-switch {
-        grid-column: span 2;    /* Ocupa el ancho de las dos columnas de arriba */
-        justify-self: center;   /* SE CENTRA ÉL MISMO sin estirar el fondo */
+        grid-column: span 2;    /* Ocupa el ancho de las dos columnas */
+        justify-self: center;   /* SE CENTRA ÉL MISMO */
         width: auto;            /* Recupera su tamaño natural */
         min-width: 140px;       /* Evita que se encoja demasiado */
         padding: 10px 20px;
+        background-color: #334155; /* Aseguramos tu color oscuro */
     }
 
-    /* 4. Formulario: 2 columnas para Activo y Euros */
+    /* Formulario: Para que no parezca una torre desordenada */
     #crypto-form {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr; /* Dos columnas en móvil también */
     }
 
-    /* Fecha y Botón Añadir ocupan todo el ancho (2 columnas) */
+    /* El botón "Añadir" y el primer input (fecha) ocupan toda la fila */
     #crypto-form input[type="date"],
     #crypto-form button {
         grid-column: span 2;
-        width: 100%;
     }
 
-    /* 5. Tabla: Scroll lateral limpio */
+    /* Tabla: Scroll lateral */
     .table-wrapper {
-        margin: 0 -15px;
+        margin: 0 -15px; 
         border-radius: 0;
         width: calc(100% + 30px);
     }
