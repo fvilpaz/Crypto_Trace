@@ -359,46 +359,46 @@ th {
 .btn-delete:hover { opacity: 0.8; }
 
 /* ==============================
-   MEDIA QUERIES RESPONSIVE
+   MEDIA QUERIES RESPONSIVE (CORREGIDO)
 ============================== */
 @media (max-width: 600px) {
 
-    /* Header: título arriba, total abajo si no cabe */
     header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .header-controls {
-        width: 100%;
+        flex-direction: row; 
         justify-content: space-between;
-        margin-top: 10px;
+        padding: 1rem;
     }
 
-    /* JSON Controls: botones apilados */
+    header h1, .logo-container { 
+        font-size: 1.2rem; 
+    }
+
     .json-controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-
-    .json-controls button,
-    .json-controls .currency-switch {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Dos columnas para los botones */
+        gap: 10px;
         width: 100%;
-        font-size: 16px;
     }
 
     .json-controls .currency-switch {
-        justify-content: space-between; /* EUR a la izquierda, USD a la derecha */
+        grid-column: span 2; 
+        justify-content: center;
+        background-color: #334155; 
+        width: auto;
     }
 
-    /* Formulario: columna única */
     #crypto-form {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr; /* Dos columnas en móvil también */
     }
 
-    /* Tabla: ancho completo en móvil */
-    table {
-        min-width: 100%;
+    /* El botón "Añadir" y el primer input (fecha) ocupan toda la fila */
+    #crypto-form input[type="date"],
+    #crypto-form button {
+        grid-column: span 2;
+    }
+
+    .table-wrapper {
+        margin: 0 -15px; /* Aprovecha los bordes del móvil */
+        border-radius: 0;
     }
 }
