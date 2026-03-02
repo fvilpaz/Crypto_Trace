@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CryptoTrace - Gestión de Activos</title>
+    <title>CryptoTrace - Gestión de Activos Segura</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilo básico de seguridad para inputs */
+        input:invalid {
+            border-color: #ef4444;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- HEADER -->
     <header>
-        <h1 id="theme-toggle" style="cursor: pointer;">🌓 CryptoTrace</h1>
+        <h1 id="theme-toggle" style="cursor: pointer; user-select: none;">🌓 CryptoTrace</h1>
         <div class="header-controls">
             <div class="total-box">
                 <span><h2>Inversión Total:</h2></span>
@@ -21,7 +26,6 @@
 
     <main>
 
-        <!-- JSON Controls (Export/Import + Toggle) -->
         <div class="json-controls">
             <button id="import-btn" class="json-btn json-import">📂 Importar Datos</button>
             <input type="file" id="import-json" accept=".json" style="display:none;">
@@ -37,18 +41,24 @@
             </div>
         </div>
 
-        <!-- FORMULARIO -->
         <section class="form-container">
             <form id="crypto-form">
-                <input type="date" id="input-fecha" required>
-                <input type="text" id="input-moneda" placeholder="Activo" required>
-                <input type="number" id="input-euros" placeholder="Inversión" step="0.01" required>
-                <input type="number" id="input-cantidad" placeholder="Cantidad" step="0.000001" required>
+                <input type="date" id="input-fecha" required aria-label="Fecha de inversión">
+                
+                <input type="text" id="input-moneda" placeholder="Activo" 
+                       required maxlength="10" pattern="[a-zA-Z0-9]+" 
+                       title="Solo letras y números, sin espacios." aria-label="Nombre del activo">
+                
+                <input type="number" id="input-euros" placeholder="Inversión €" 
+                       step="0.01" min="0" required aria-label="Cantidad invertida en Euros">
+                
+                <input type="number" id="input-cantidad" placeholder="Cantidad" 
+                       step="any" min="0" required aria-label="Cantidad de activo recibida">
+                
                 <button type="submit">Añadir</button>
             </form>
         </section>
 
-        <!-- TABLA RESPONSIVE -->
         <section class="table-wrapper">
             <table id="main-table">
                 <thead>
@@ -62,8 +72,7 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <!-- JS inyectará las filas aquí -->
-                </tbody>
+                    </tbody>
             </table>
         </section>
 
