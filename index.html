@@ -8,13 +8,25 @@
 </head>
 <body>
 
+    <!-- HEADER -->
     <header>
-        <h1 id="theme-toggle" style="cursor: pointer;">CryptoTrace 🌓</h1>
+        <h1 id="theme-toggle" style="cursor: pointer;">🌓 CryptoTrace</h1>
         <div class="header-controls">
             <div class="total-box">
-                <span>Inversión Total:</span>
+                <span><h2>Inversión Total:</h2></span>
                 <strong id="total-general">0.00 €</strong>
             </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- JSON Controls (Export/Import + Toggle) -->
+        <div class="json-controls">
+            <button id="import-btn" class="json-btn json-import">📂 Importar Datos</button>
+            <input type="file" id="import-json" accept=".json" style="display:none;">
+            <button id="export-json" class="json-btn json-export">💾 Exportar Datos</button>
+
             <div class="currency-switch">
                 <span>EUR</span>
                 <label class="switch">
@@ -24,10 +36,8 @@
                 <span>USD</span>
             </div>
         </div>
-    </header>
 
-    <main>
-        <!-- Sección de Formulario -->
+        <!-- FORMULARIO -->
         <section class="form-container">
             <form id="crypto-form">
                 <input type="date" id="input-fecha" required>
@@ -38,7 +48,7 @@
             </form>
         </section>
 
-        <!-- Tabla Responsive -->
+        <!-- TABLA RESPONSIVE -->
         <section class="table-wrapper">
             <table id="main-table">
                 <thead>
@@ -56,6 +66,7 @@
                 </tbody>
             </table>
         </section>
+
     </main>
 
     <script src="js/app.js"></script>
