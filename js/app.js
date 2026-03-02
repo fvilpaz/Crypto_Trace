@@ -1,9 +1,16 @@
 // ==============================
+// CONFIGURACIÓN DE API
+// ==============================
+// Tu clave API activa
+const API_KEY = '5e1be3db14885125382b9d17'; 
+const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/EUR`;
+
+// ==============================
 // CONFIGURACIÓN INICIAL Y CARGA DE DATOS
 // ==============================
 let compras = JSON.parse(localStorage.getItem('crypto_data')) || [];
 let enUSD = false;
-const TIPO_CAMBIO = 1.09; // Simulación: 1 EUR = 1.09 USD
+let tasaCambioReal = 1.0; // Se actualizará con la API
 
 // ==============================
 // REFERENCIAS AL DOM
@@ -13,11 +20,27 @@ const tableBody = document.getElementById('table-body');
 const toggleCurrency = document.getElementById('currency-toggle');
 const totalDisplay = document.getElementById('total-general');
 const themeBtn = document.getElementById('theme-toggle');
-
-// JSON Export/Import
 const exportBtn = document.getElementById('export-json');
 const importBtn = document.getElementById('import-btn');
 const importInput = document.getElementById('import-json');
+
+// ==============================
+// FUNCIÓN PARA OBTENER TASA EN TIEMPO REAL
+// ==============================
+async function obtenerTasaReal() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        if (data.result === "success") {
+            tasaCambioReal = data.conversion_rates.USD;
+            console.log(`Tasa actualizada: 1 EUR = ${tasaCambioReal} USD`);
+            render(); // Actualizamos la vista con la tasa nueva
+        }
+    } catch (error) {
+        console.error("Error conectando con la API:", error);
+    }
+}
 
 // ==============================
 // DARK MODE
@@ -32,10 +55,13 @@ if (localStorage.getItem('dark_mode') === 'true') {
 }
 
 // ==============================
-// FORMATEO DE MONEDA
+// FORMATEO DE MONEDA CON TASA REAL
 // ==============================
 function formatMoney(valor) {
-    const finalVal = enUSD ? valor * TIPO_CAMBIO : valor;
+    if (isNaN(valor)) valor = 0;
+    // Usamos la tasaCambioReal obtenida de la API
+    const finalVal = enUSD ? valor * tasaCambioReal : valor;
+    
     return finalVal.toLocaleString('es-ES', { 
         style: 'currency', 
         currency: enUSD ? 'USD' : 'EUR' 
@@ -43,31 +69,44 @@ function formatMoney(valor) {
 }
 
 // ==============================
-// RENDER TABLA
+// RENDER TABLA (SEGURO)
 // ==============================
 function render() {
     tableBody.innerHTML = '';
     let totalEur = 0;
 
     compras.forEach((c, index) => {
-        totalEur += c.eur;
-        const precioUnitario = c.eur / c.cantidad;
+        totalEur += c.eur; 
+        const precioUnitario = c.cantidad > 0 ? (c.eur / c.cantidad) : 0;
 
         const fila = document.createElement('tr');
+        
+        // SEGURIDAD: Uso de textContent para prevenir XSS
         fila.innerHTML = `
-            <td>${c.fecha}</td>
-            <td><strong>${c.moneda}</strong></td>
-            <td>${formatMoney(c.eur)}</td>
-            <td>${c.cantidad.toFixed(6)}</td>
-            <td>${formatMoney(precioUnitario)}</td>
-            <td>
-                <button class="btn-delete" onclick="borrarCompra(${index})">🗑️</button>
-            </td>
+            <td></td>
+            <td><strong></strong></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         `;
+        
+        fila.cells[0].textContent = c.fecha;
+        fila.cells[1].textContent = c.moneda;
+        fila.cells[2].textContent = formatMoney(c.eur);
+        fila.cells[3].textContent = c.cantidad.toFixed(6);
+        fila.cells[4].textContent = formatMoney(precioUnitario);
+        
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn-delete';
+        btnDelete.textContent = '🗑️';
+        btnDelete.onclick = () => borrarCompra(index);
+        fila.cells[5].appendChild(btnDelete);
+
         tableBody.appendChild(fila);
     });
 
-    totalDisplay.innerText = formatMoney(totalEur);
+    totalDisplay.textContent = formatMoney(totalEur);
 }
 
 // ==============================
@@ -109,7 +148,7 @@ toggleCurrency.addEventListener('change', () => {
 });
 
 // ==============================
-// EXPORTAR JSON
+// EXPORTAR/IMPORTAR JSON
 // ==============================
 exportBtn.addEventListener('click', () => {
     const dataStr = JSON.stringify(compras, null, 2);
@@ -122,9 +161,6 @@ exportBtn.addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
-// ==============================
-// IMPORTAR JSON
-// ==============================
 importBtn.addEventListener('click', () => {
     importInput.click();
 });
@@ -155,4 +191,5 @@ importInput.addEventListener('change', (event) => {
 // ==============================
 // INICIALIZACIÓN
 // ==============================
-render();
+obtenerTasaReal(); // Llamamos a la API al abrir
+render(); // Render inicial
