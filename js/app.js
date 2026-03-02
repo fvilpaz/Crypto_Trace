@@ -1,37 +1,50 @@
-// Configuración inicial y carga de datos
+// ==============================
+// CONFIGURACIÓN INICIAL Y CARGA DE DATOS
+// ==============================
 let compras = JSON.parse(localStorage.getItem('crypto_data')) || [];
 let enUSD = false;
 const TIPO_CAMBIO = 1.09; // Simulación: 1 EUR = 1.09 USD
 
-// Referencias al DOM
+// ==============================
+// REFERENCIAS AL DOM
+// ==============================
 const form = document.getElementById('crypto-form');
 const tableBody = document.getElementById('table-body');
 const toggleCurrency = document.getElementById('currency-toggle');
 const totalDisplay = document.getElementById('total-general');
 const themeBtn = document.getElementById('theme-toggle');
 
-// 1. Lógica de Dark Mode
+// JSON Export/Import
+const exportBtn = document.getElementById('export-json');
+const importBtn = document.getElementById('import-btn');
+const importInput = document.getElementById('import-json');
+
+// ==============================
+// DARK MODE
+// ==============================
 themeBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark-theme');
     localStorage.setItem('dark_mode', document.body.classList.contains('dark-theme'));
 });
 
-// Comprobar preferencia de tema al cargar
 if (localStorage.getItem('dark_mode') === 'true') {
     document.body.classList.add('dark-theme');
 }
 
-// 2. Función para formatear el dinero según la moneda seleccionada
+// ==============================
+// FORMATEO DE MONEDA
+// ==============================
 function formatMoney(valor) {
     const finalVal = enUSD ? valor * TIPO_CAMBIO : valor;
-    const simbolo = enUSD ? '$' : '€';
     return finalVal.toLocaleString('es-ES', { 
         style: 'currency', 
         currency: enUSD ? 'USD' : 'EUR' 
     });
 }
 
-// 3. Función principal para dibujar la tabla
+// ==============================
+// RENDER TABLA
+// ==============================
 function render() {
     tableBody.innerHTML = '';
     let totalEur = 0;
@@ -57,7 +70,9 @@ function render() {
     totalDisplay.innerText = formatMoney(totalEur);
 }
 
-// 4. Añadir nueva compra
+// ==============================
+// AÑADIR NUEVA COMPRA
+// ==============================
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     
@@ -74,7 +89,9 @@ form.addEventListener('submit', (e) => {
     render();
 });
 
-// 5. Borrar compra
+// ==============================
+// BORRAR COMPRA
+// ==============================
 window.borrarCompra = function(index) {
     if (confirm('¿Deseas eliminar este registro?')) {
         compras.splice(index, 1);
@@ -83,11 +100,59 @@ window.borrarCompra = function(index) {
     }
 };
 
-// 6. Toggle de Moneda
+// ==============================
+// TOGGLE MONEDA
+// ==============================
 toggleCurrency.addEventListener('change', () => {
     enUSD = toggleCurrency.checked;
     render();
 });
 
-// Inicialización
+// ==============================
+// EXPORTAR JSON
+// ==============================
+exportBtn.addEventListener('click', () => {
+    const dataStr = JSON.stringify(compras, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "crypto_data.json";
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// ==============================
+// IMPORTAR JSON
+// ==============================
+importBtn.addEventListener('click', () => {
+    importInput.click();
+});
+
+importInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (Array.isArray(importedData)) {
+                compras = importedData;
+                localStorage.setItem('crypto_data', JSON.stringify(compras));
+                render();
+                alert("Datos importados correctamente ✅");
+            } else {
+                alert("Formato inválido ❌");
+            }
+        } catch (err) {
+            alert("Error leyendo el archivo JSON ❌");
+        }
+    };
+    reader.readAsText(file);
+});
+
+// ==============================
+// INICIALIZACIÓN
+// ==============================
 render();
