@@ -1,16 +1,16 @@
 // ==============================
 // CONFIGURACIÓN DE API
 // ==============================
-// Tu clave API activa
 const API_KEY = '5e1be3db14885125382b9d17'; 
 const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/EUR`;
 
 // ==============================
-// CONFIGURACIÓN INICIAL Y CARGA DE DATOS
+// CONFIGURACIÓN INICIAL
 // ==============================
 let compras = JSON.parse(localStorage.getItem('crypto_data')) || [];
 let enUSD = false;
-let tasaCambioReal = 1.0; // Se actualizará con la API
+let tasaCambioReal = 1.0; 
+let editandoIndex = -1; // -1 significa que no estamos editando
 
 // ==============================
 // REFERENCIAS AL DOM
@@ -23,6 +23,8 @@ const themeBtn = document.getElementById('theme-toggle');
 const exportBtn = document.getElementById('export-json');
 const importBtn = document.getElementById('import-btn');
 const importInput = document.getElementById('import-json');
+const btnSubmit = form.querySelector('button[type="submit"]');
+const btnCancelar = document.getElementById('btn-cancelar');
 
 // ==============================
 // FUNCIÓN PARA OBTENER TASA EN TIEMPO REAL
@@ -35,7 +37,7 @@ async function obtenerTasaReal() {
         if (data.result === "success") {
             tasaCambioReal = data.conversion_rates.USD;
             console.log(`Tasa actualizada: 1 EUR = ${tasaCambioReal} USD`);
-            render(); // Actualizamos la vista con la tasa nueva
+            render(); 
         }
     } catch (error) {
         console.error("Error conectando con la API:", error);
@@ -59,7 +61,6 @@ if (localStorage.getItem('dark_mode') === 'true') {
 // ==============================
 function formatMoney(valor) {
     if (isNaN(valor)) valor = 0;
-    // Usamos la tasaCambioReal obtenida de la API
     const finalVal = enUSD ? valor * tasaCambioReal : valor;
     
     return finalVal.toLocaleString('es-ES', { 
@@ -69,7 +70,7 @@ function formatMoney(valor) {
 }
 
 // ==============================
-// RENDER TABLA (SEGURO)
+// RENDER TABLA (CON EDITAR Y BORRAR)
 // ==============================
 function render() {
     tableBody.innerHTML = '';
@@ -81,27 +82,40 @@ function render() {
 
         const fila = document.createElement('tr');
         
-        // SEGURIDAD: Uso de textContent para prevenir XSS
         fila.innerHTML = `
             <td></td>
             <td><strong></strong></td>
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
+            <td class="action-cells"></td>
         `;
         
         fila.cells[0].textContent = c.fecha;
         fila.cells[1].textContent = c.moneda;
         fila.cells[2].textContent = formatMoney(c.eur);
-        fila.cells[3].textContent = c.cantidad.toFixed(6);
+        fila.cells[3].textContent = parseFloat(c.cantidad).toFixed(6);
         fila.cells[4].textContent = formatMoney(precioUnitario);
         
+        // --- BOTONES ACCIONES ---
+        const actionsContainer = fila.cells[5];
+        
+        // Botón Editar
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn-delete';
+        btnEdit.style.background = '#3b82f6'; // Azul editar
+        btnEdit.style.marginRight = '5px';
+        btnEdit.textContent = '✏️';
+        btnEdit.onclick = () => iniciarEdicion(index);
+        
+        // Botón Borrar
         const btnDelete = document.createElement('button');
         btnDelete.className = 'btn-delete';
         btnDelete.textContent = '🗑️';
         btnDelete.onclick = () => borrarCompra(index);
-        fila.cells[5].appendChild(btnDelete);
+        
+        actionsContainer.appendChild(btnEdit);
+        actionsContainer.appendChild(btnDelete);
 
         tableBody.appendChild(fila);
     });
@@ -110,7 +124,34 @@ function render() {
 }
 
 // ==============================
-// AÑADIR NUEVA COMPRA
+// LÓGICA EDICIÓN
+// ==============================
+function iniciarEdicion(index) {
+    editandoIndex = index;
+    const compra = compras[index];
+    
+    // Rellenar formulario
+    document.getElementById('input-fecha').value = compra.fecha;
+    document.getElementById('input-moneda').value = compra.moneda;
+    document.getElementById('input-euros').value = compra.eur;
+    document.getElementById('input-cantidad').value = compra.cantidad;
+    
+    // Cambiar texto botón y mostrar cancelar
+    btnSubmit.textContent = 'Actualizar';
+    btnCancelar.style.display = 'inline-block';
+}
+
+function cancelarEdicion() {
+    editandoIndex = -1;
+    form.reset();
+    btnSubmit.textContent = 'Añadir';
+    btnCancelar.style.display = 'none';
+}
+
+btnCancelar.addEventListener('click', cancelarEdicion);
+
+// ==============================
+// AÑADIR/ACTUALIZAR COMPRA
 // ==============================
 form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -122,7 +163,15 @@ form.addEventListener('submit', (e) => {
         cantidad: parseFloat(document.getElementById('input-cantidad').value)
     };
 
-    compras.push(nuevaCompra);
+    if (editandoIndex === -1) {
+        // Modo Añadir
+        compras.push(nuevaCompra);
+    } else {
+        // Modo Editar
+        compras[editandoIndex] = nuevaCompra;
+        cancelarEdicion();
+    }
+    
     localStorage.setItem('crypto_data', JSON.stringify(compras));
     form.reset();
     render();
@@ -136,6 +185,7 @@ window.borrarCompra = function(index) {
         compras.splice(index, 1);
         localStorage.setItem('crypto_data', JSON.stringify(compras));
         render();
+        if (editandoIndex === index) cancelarEdicion(); // Si borras lo que editas, cancela
     }
 };
 
@@ -191,5 +241,5 @@ importInput.addEventListener('change', (event) => {
 // ==============================
 // INICIALIZACIÓN
 // ==============================
-obtenerTasaReal(); // Llamamos a la API al abrir
-render(); // Render inicial
+obtenerTasaReal(); 
+render();
