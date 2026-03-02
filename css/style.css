@@ -1,3 +1,6 @@
+/* ==============================
+   VARIABLES PRINCIPALES
+============================== */
 :root {
     --primary: #2563eb;
     --bg: #f8fafc;
@@ -7,7 +10,9 @@
     --header-bg: #ffffff;
 }
 
-/* Variables para el Dark Mode */
+/* ==============================
+   DARK MODE
+============================== */
 body.dark-theme {
     --bg: #0f172a;
     --card-bg: #1e293b;
@@ -16,6 +21,9 @@ body.dark-theme {
     --header-bg: #1e293b;
 }
 
+/* ==============================
+   BODY
+============================== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg);
@@ -25,10 +33,15 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
+/* ==============================
+   HEADER
+============================== */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap; /* permite que los controles bajen si no caben */
+    gap: 10px; /* separación cuando hace wrap */
     padding: 1rem;
     background: var(--header-bg);
     border-radius: 12px;
@@ -39,6 +52,7 @@ header {
     z-index: 100;
 }
 
+
 #theme-toggle { cursor: pointer; user-select: none; }
 
 /* Controles de Moneda y Totales */
@@ -47,14 +61,48 @@ header {
 .total-box strong { display: block; font-size: 1.2rem; color: var(--primary); }
 
 /* Switch Toggle EUR/USD */
-.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 20px; }
-.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+.switch { 
+    position: relative; 
+    display: inline-block; 
+    width: 40px; 
+    height: 20px; 
+}
+.switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+}
+
+.slider { 
+    position: absolute; 
+    cursor: pointer; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background-color: #cbd5e1; 
+    transition: .4s; 
+    border-radius: 20px; 
+}
+
+.slider:before { 
+    position: absolute; 
+    content: ""; 
+    height: 14px; 
+    width: 14px; 
+    left: 3px; 
+    bottom: 3px; 
+    background-color: white; 
+    transition: .4s; 
+    border-radius: 50%; 
+}
+
 input:checked + .slider { background-color: var(--primary); }
 input:checked + .slider:before { transform: translateX(20px); }
 
-/* Formulario */
+/* ==============================
+   FORMULARIO
+============================== */
 .form-container {
     background: var(--card-bg);
     padding: 20px;
@@ -75,7 +123,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     border: 1px solid var(--border);
     background: var(--card-bg);
     color: var(--text);
-    font-size: 16px; /* Evita zoom en iOS */
+    font-size: 16px;
 }
 
 #crypto-form button {
@@ -86,7 +134,193 @@ input:checked + .slider:before { transform: translateX(20px); }
     cursor: pointer;
 }
 
-/* Tabla Responsive */
+/* ==============================
+   VARIABLES Y DARK MODE
+============================== */
+:root {
+    --primary: #2563eb;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --header-bg: #ffffff;
+}
+
+body.dark-theme {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #f8fafc;
+    --border: #334155;
+    --header-bg: #1e293b;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 15px;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ==============================
+   HEADER
+============================== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* permite bajar controles si no caben */
+    gap: 10px;
+    padding: 1rem;
+    background: var(--header-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#theme-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Total inversión */
+.total-box {
+    text-align: right;
+}
+.total-box strong {
+    display: block;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+/* ==============================
+   FORMULARIO
+============================== */
+.form-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+#crypto-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+#crypto-form input,
+#crypto-form button {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 16px;
+}
+
+#crypto-form button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ==============================
+   JSON CONTROLS (EXPORT/IMPORT + TOGGLE)
+============================== */
+.json-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.json-controls button {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+.json-controls button:hover { opacity: 0.85; }
+
+.json-controls .currency-switch {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+}
+
+.json-controls .currency-switch label.switch {
+    margin: 0 5px;
+}
+
+/* ==============================
+   COLORES BOTONES JSON CONTROLS
+============================== */
+
+/* Base común para export/import */
+.json-controls .json-btn {
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+/* IMPORT */
+.json-controls .json-import {
+    background-color: #3b82f6;  /* azul */
+}
+.json-controls .json-import:hover {
+    background-color: #1d4ed8;  /* azul más oscuro */
+}
+
+/* EXPORT */
+.json-controls .json-export {
+    background-color: #10b981;  /* verde */
+}
+.json-controls .json-export:hover {
+    background-color: #059669;  /* verde más intenso */
+}
+
+/* TOGGLE EUR/USD */
+.json-controls .currency-switch {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background-color: #334155;  /* rojo */
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.json-controls .currency-switch:hover {
+    background-color: #1e293b;  /* oscuro */
+}
+
+/* ==============================
+   TABLA RESPONSIVE
+============================== */
 .table-wrapper {
     background: var(--card-bg);
     border-radius: 12px;
@@ -94,9 +328,23 @@ input:checked + .slider:before { transform: translateX(20px); }
     border: 1px solid var(--border);
 }
 
-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
-th { background: rgba(0,0,0,0.02); font-weight: 600; color: var(--text); position: sticky; top: 0; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+th {
+    background: rgba(0,0,0,0.02);
+    font-weight: 600;
+    color: var(--text);
+    position: sticky;
+    top: 0;
+}
 
 /* Botón Borrar */
 .btn-delete {
@@ -108,5 +356,49 @@ th { background: rgba(0,0,0,0.02); font-weight: 600; color: var(--text); positio
     cursor: pointer;
     transition: opacity 0.2s;
 }
-
 .btn-delete:hover { opacity: 0.8; }
+
+/* ==============================
+   MEDIA QUERIES RESPONSIVE
+============================== */
+@media (max-width: 600px) {
+
+    /* Header: título arriba, total abajo si no cabe */
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    /* JSON Controls: botones apilados */
+    .json-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .json-controls button,
+    .json-controls .currency-switch {
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .json-controls .currency-switch {
+        justify-content: space-between; /* EUR a la izquierda, USD a la derecha */
+    }
+
+    /* Formulario: columna única */
+    #crypto-form {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tabla: ancho completo en móvil */
+    table {
+        min-width: 100%;
+    }
+}
