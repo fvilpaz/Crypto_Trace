@@ -381,11 +381,17 @@ th {
     }
 
     .json-controls .currency-switch {
-        grid-column: span 2; 
-        justify-content: center;
-        background-color: #334155; 
-        width: auto;
-    }
+    grid-column: span 2; 
+    justify-self: center;   /* Centra el bloque entero dentro de la rejilla */
+    display: flex;          /* Para alinear EUR - Switch - USD en línea */
+    align-items: center;
+    justify-content: center; /* Centra el contenido interno */
+    background-color: #334155; 
+    width: fit-content;      /* Hace que el botón solo sea tan ancho como su contenido */
+    padding: 10px 25px;      /* Espacio interno para que no se vea apretado */
+    margin: 5px 0;           /* Separación vertical */
+}
+
 
     #crypto-form {
         grid-template-columns: 1fr 1fr; /* Dos columnas en móvil también */
