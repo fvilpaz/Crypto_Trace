@@ -180,7 +180,7 @@ form.addEventListener('submit', (e) => {
 // ==============================
 // BORRAR COMPRA
 // ==============================
-window.borrarCompra = function(index) {
+function borrarCompra(index) {
     if (confirm('¿Deseas eliminar este registro?')) {
         compras.splice(index, 1);
         localStorage.setItem('crypto_data', JSON.stringify(compras));
