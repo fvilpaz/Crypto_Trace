@@ -135,6 +135,76 @@ function escapeHtml(s) {
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// ==============================
+// LOGOS DE MONEDA (CoinGecko, con caché y fallback monograma)
+// ==============================
+// Mapa "BTC" -> URL del logo. Persistido: las URLs cambian rarísimo.
+let logoCache = JSON.parse(localStorage.getItem('coin_logos') || '{}');
+// Símbolos ya intentados en esta sesión (éxito o fallo) para no repetir peticiones
+// ni entrar en bucle render -> fetch -> render.
+const logosPedidos = new Set();
+
+// Color estable por ticker (hash -> hue) para el monograma de fallback.
+function colorMonograma(moneda) {
+    let h = 0;
+    for (let i = 0; i < moneda.length; i++) h = (h * 31 + moneda.charCodeAt(i)) % 360;
+    return `hsl(${h}, 55%, 45%)`;
+}
+
+// Devuelve el HTML del icono: <img> del logo si lo tenemos (con fallback a
+// monograma vía onerror), o directamente el monograma si aún no hay URL.
+function iconoActivo(moneda) {
+    const key = String(moneda).toUpperCase();
+    const iniciales = escapeHtml(key.slice(0, 3));
+    const monoAbierto = (display) =>
+        `<span class="coin-ic-mono" style="display:${display};background:${colorMonograma(key)}">${iniciales}</span>`;
+
+    const url = logoCache[key];
+    if (url) {
+        return `<span class="coin-ic">` +
+            `<img src="${escapeHtml(url)}" alt="" loading="lazy" class="coin-ic-img" ` +
+            `onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` +
+            monoAbierto('none') +
+            `</span>`;
+    }
+    return `<span class="coin-ic">${monoAbierto('flex')}</span>`;
+}
+
+// Pide a CoinGecko solo los símbolos que faltan (una llamada). Se auto-cura: al
+// añadir/importar una moneda nueva, el siguiente render() la detecta y la pide.
+async function refrescarLogosSiHaceFalta() {
+    const symbols = [...new Set(compras.map((c) => (c.moneda || '').toUpperCase()).filter(Boolean))]
+        .filter((s) => !(s in logoCache) && !logosPedidos.has(s));
+
+    if (!symbols.length || !navigator.onLine) return;
+    symbols.forEach((s) => logosPedidos.add(s));
+
+    try {
+        const lista = symbols.map((s) => s.toLowerCase()).join(',');
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&symbols=${lista}&include_tokens=top`;
+        const resp = await fetch(url);
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!Array.isArray(data)) return;
+
+        let hayNuevos = false;
+        data.forEach((item) => {
+            const sym = (item.symbol || '').toUpperCase();
+            if (sym && item.image && !(sym in logoCache)) {
+                logoCache[sym] = item.image;
+                hayNuevos = true;
+            }
+        });
+        if (hayNuevos) {
+            localStorage.setItem('coin_logos', JSON.stringify(logoCache));
+            render();
+        }
+    } catch (e) {
+        // Sin red o API caída: nos quedamos con los monogramas. No es crítico.
+        console.warn('No se pudieron obtener logos de CoinGecko:', e);
+    }
+}
+
 function guardarEstado() {
     try {
         localStorage.setItem('crypto_data', JSON.stringify(compras));
@@ -382,7 +452,7 @@ function renderStats(comprasDelAnio) {
             const anchoBarra = maxPct > 0 ? (fraccion / maxPct) * 100 : 0;
             return `
                 <div class="asset-chip">
-                    <div class="asset-chip-top"><strong>${escapeHtml(moneda)}</strong><span class="asset-chip-pct">${pct}%</span></div>
+                    <div class="asset-chip-top"><span class="asset-chip-name">${iconoActivo(moneda)}<strong>${escapeHtml(moneda)}</strong></span><span class="asset-chip-pct">${pct}%</span></div>
                     <div>${formatMoney(total)}</div>
                     <div class="asset-chip-bar"><div class="asset-chip-bar-fill" style="width:${anchoBarra}%"></div></div>
                 </div>
@@ -558,7 +628,7 @@ function render() {
         `;
 
         fila.cells[0].textContent = c.fecha;
-        fila.cells[1].textContent = c.moneda;
+        fila.cells[1].innerHTML = `<span class="coin-cell">${iconoActivo(c.moneda)}<strong>${escapeHtml(c.moneda)}</strong></span>`;
         fila.cells[2].textContent = formatMoney(c.eur);
         fila.cells[3].textContent = formatMoney(comision);
         fila.cells[4].textContent = parseFloat(c.cantidad).toFixed(6);
@@ -592,6 +662,7 @@ function render() {
     totalDisplay.textContent = formatMoney(totalAnioCompleto);
 
     actualizarBackupBanner();
+    refrescarLogosSiHaceFalta();
 }
 
 // ==============================

@@ -466,6 +466,36 @@ th.sortable .sort-arrow {
     font-size: 0.95rem;
 }
 
+/* Icono de moneda (logo CoinGecko + fallback monograma) */
+.coin-ic {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    flex: none;
+}
+.coin-ic-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.coin-ic-mono {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.3px;
+}
+.coin-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
 /* Tarjetas KPI (media mensual / coste medio / frecuencia) */
 .kpi-grid {
     display: grid;
@@ -565,9 +595,14 @@ body.dark-theme .kpi-ic.a { color: #fbbf24; }
 .asset-chip .asset-chip-top {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 10px;
     margin-bottom: 6px;
+}
+.asset-chip .asset-chip-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .asset-chip .asset-chip-pct {
     opacity: 0.65;
