@@ -29,7 +29,7 @@ let filtroMoneda = ''; // texto de búsqueda por moneda
 let filtroDesde = '';
 let filtroHasta = '';
 let sortColumn = 'fecha';
-let sortDir = 'asc';
+let sortDir = 'desc'; // por defecto, las compras más recientes primero
 let undoData = null;
 let undoTimeoutId = null;
 
@@ -204,6 +204,27 @@ async function refrescarLogosSiHaceFalta() {
                 hayNuevos = true;
             }
         });
+
+        // Segundo intento por ID para los que no resolvieron por símbolo
+        // (p. ej. escribiste "BIT2ME" y el id en CoinGecko es "bit2me", símbolo B2M).
+        const faltan = symbols.filter((s) => !(s in logoCache));
+        if (faltan.length) {
+            const ids = faltan.map((s) => s.toLowerCase()).join(',');
+            const resp2 = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids=${ids}`);
+            if (resp2.ok) {
+                const data2 = await resp2.json();
+                if (Array.isArray(data2)) {
+                    data2.forEach((item) => {
+                        const key = (item.id || '').toUpperCase();
+                        if (key && item.image && !(key in logoCache)) {
+                            logoCache[key] = item.image;
+                            hayNuevos = true;
+                        }
+                    });
+                }
+            }
+        }
+
         if (hayNuevos) {
             localStorage.setItem('coin_logos', JSON.stringify(logoCache));
             render();
@@ -448,10 +469,18 @@ function renderStats(comprasDelAnio) {
     const comp = calcularComparativaAnual();
     let comparisonHtml = '';
     if (comp) {
-        const signo = comp.pct >= 0 ? '+' : '';
-        const clase = comp.pct >= 0 ? 'up' : 'down';
+        const delta = comp.actual - comp.anterior;
+        const flecha = comp.pct >= 0 ? '↑' : '↓';
         const rangoTxt = comp.esAnioActual ? 'hasta hoy' : 'año completo';
-        comparisonHtml = `<div class="stats-comparison ${clase}">📊 vs ${comp.anioAnterior} (${rangoTxt}): <strong>${signo}${comp.pct.toFixed(1)}%</strong> (${formatMoney(comp.actual)} vs ${formatMoney(comp.anterior)})</div>`;
+        const etiquetaDiff = delta >= 0 ? 'Invertido de más' : 'Invertido de menos';
+        comparisonHtml = `
+            <div class="stats-comparison">
+                <div class="cmp-toplbl">Inversión acumulada · ${rangoTxt}</div>
+                <div class="cmp-row cur"><span class="cmp-yr">${anioActivo}</span><span class="cmp-val">${formatMoney(comp.actual)}</span></div>
+                <div class="cmp-row prev"><span class="cmp-yr">${comp.anioAnterior}</span><span class="cmp-val">${formatMoney(comp.anterior)}</span></div>
+                <div class="cmp-divider"></div>
+                <div class="cmp-row diff"><span class="cmp-yr">${etiquetaDiff}</span><span class="cmp-val">${formatMoney(Math.abs(delta))} <span class="cmp-pill">${flecha} ${Math.abs(Math.round(comp.pct))}%</span></span></div>
+            </div>`;
     }
 
     const maxPct = Math.max(...[...porMoneda.values()].map((v) => v / totalAnio));

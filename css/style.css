@@ -259,14 +259,23 @@ th {
 }
 
 /* Pestañas por año */
+/* Misma fórmula que los chips de activos (.asset-chips), que sí desliza */
 .year-tabs {
     display: flex;
+    flex-wrap: nowrap;
     gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 0 4px 10px;
+    scrollbar-width: thin;
     margin-bottom: 10px;
 }
+.year-tabs::-webkit-scrollbar { height: 5px; }
+.year-tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 .year-tab {
+    flex: 0 0 auto; /* que no se encojan: desbordan y se deslizan */
+    scroll-snap-align: center;
+    white-space: nowrap;
     padding: 8px 16px;
     border-radius: 8px;
     border: 1px solid var(--border);
@@ -395,12 +404,63 @@ th {
 }
 
 /* Comparativa año anterior */
+/* Comparativa anual: mini tabla clara (2 años + diferencia) */
 .stats-comparison {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
 }
-.stats-comparison.up { color: #10b981; }
-.stats-comparison.down { color: #ef4444; }
+.stats-comparison .cmp-toplbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.stats-comparison .cmp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+}
+.stats-comparison .cmp-yr {
+    font-size: 0.9rem;
+    color: var(--text);
+    opacity: 0.7;
+}
+.stats-comparison .cmp-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+.stats-comparison .cmp-row.cur .cmp-yr { opacity: 1; font-weight: 600; }
+.stats-comparison .cmp-row.prev .cmp-val { color: #94a3b8; }
+.stats-comparison .cmp-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+}
+.stats-comparison .cmp-row.diff .cmp-yr { color: #2563eb; font-weight: 700; opacity: 1; }
+.stats-comparison .cmp-row.diff .cmp-val { color: #2563eb; font-size: 1.15rem; }
+body.dark-theme .stats-comparison .cmp-row.diff .cmp-yr,
+body.dark-theme .stats-comparison .cmp-row.diff .cmp-val { color: #60a5fa; }
+.stats-comparison .cmp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(59, 130, 246, 0.16);
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+}
+body.dark-theme .stats-comparison .cmp-pill { color: #60a5fa; }
 
 /* Cabeceras ordenables */
 th.sortable {
@@ -472,19 +532,31 @@ th.sortable .sort-arrow {
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* etiqueta + chips en una fila; los chips se deslizan */
 }
 .coin-quick-label {
+    flex: none;
     font-size: 0.8rem;
     font-weight: 600;
     color: #94a3b8;
 }
+/* Misma fórmula que .asset-chips (+ flex:1/min-width:0 por ser hijo flex) */
 .coin-quick-chips {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 0 4px 10px;
+    scrollbar-width: thin;
 }
+.coin-quick-chips::-webkit-scrollbar { height: 5px; }
+.coin-quick-chips::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 .coin-quick-chip {
+    flex: 0 0 auto; /* no se encogen: desbordan y se deslizan */
+    scroll-snap-align: center;
     display: inline-flex;
     align-items: center;
     gap: 6px;
