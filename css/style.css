@@ -465,6 +465,54 @@ th.sortable .sort-arrow {
     margin-bottom: 8px;
     font-size: 0.95rem;
 }
+
+/* Tarjetas KPI (media mensual / coste medio / frecuencia) */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.kpi-tile {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+.kpi-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+.kpi-ic svg { display: block; }
+.kpi-ic.b { background: rgba(59, 130, 246, 0.16); color: #2563eb; }
+.kpi-ic.v { background: rgba(139, 92, 246, 0.16); color: #7c3aed; }
+.kpi-ic.a { background: rgba(245, 158, 11, 0.16); color: #d97706; }
+body.dark-theme .kpi-ic.b { color: #60a5fa; }
+body.dark-theme .kpi-ic.v { color: #a78bfa; }
+body.dark-theme .kpi-ic.a { color: #fbbf24; }
+.kpi-lab {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.kpi-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+}
+
 .asset-chips-wrapper {
     position: relative;
 }
@@ -579,6 +627,9 @@ th.sortable .sort-arrow {
     /* En móvil dejamos solo el icono de cartera para no chocar con el título */
     #portfolio-link span, #portfolio-link .pl-arrow { display: none; }
     #portfolio-link { padding: 8px 11px; gap: 0; }
+
+    /* Tarjetas KPI apiladas para que no queden apretadas */
+    .kpi-grid { grid-template-columns: 1fr; }
 
     /* En móvil, los botones se apilan */
     .json-controls {

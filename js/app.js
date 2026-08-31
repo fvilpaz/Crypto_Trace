@@ -392,7 +392,20 @@ function renderStats(comprasDelAnio) {
 
     statsSummary.innerHTML = `
         ${comparisonHtml}
-        <div class="stats-line">Media mensual: <strong>${formatMoney(mediaMensual)}</strong> · Coste medio/compra: <strong>${formatMoney(costeMedio)}</strong> · Frecuencia: <strong>${frecuenciaTxt}</strong></div>
+        <div class="kpi-grid">
+            <div class="kpi-tile">
+                <div class="kpi-ic b"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div>
+                <div><div class="kpi-lab">Media mensual</div><div class="kpi-val">${formatMoney(mediaMensual)}</div></div>
+            </div>
+            <div class="kpi-tile">
+                <div class="kpi-ic v"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h8Z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+                <div><div class="kpi-lab">Coste medio</div><div class="kpi-val">${formatMoney(costeMedio)}</div></div>
+            </div>
+            <div class="kpi-tile">
+                <div class="kpi-ic a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                <div><div class="kpi-lab">Frecuencia</div><div class="kpi-val">${frecuenciaTxt}</div></div>
+            </div>
+        </div>
         <div class="asset-chips-wrapper">
             <div class="asset-chips">${chips}</div>
         </div>
