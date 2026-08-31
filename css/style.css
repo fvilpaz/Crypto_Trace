@@ -51,12 +51,30 @@ header {
     z-index: 100;
 }
 
-#theme-toggle { 
-    cursor: pointer; 
-    user-select: none; 
+header h1 {
     margin: 0;
-    font-size: 1.5rem;
+    color: var(--text);
 }
+
+#theme-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#theme-toggle:hover { opacity: 0.85; }
 
 /* ==============================
    TOTAL DESTACADO (Arriba)
@@ -213,6 +231,306 @@ th {
     top: 0;
 }
 
+/* Pestañas por año */
+.year-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.year-tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.year-tab:hover { opacity: 0.85; }
+.year-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Aviso de backup */
+.backup-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.backup-banner button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: #f59e0b;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Barra de búsqueda */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 10px;
+}
+.search-icon { font-size: 1rem; }
+.search-bar input[type="text"] {
+    flex: 1;
+    min-width: 140px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+}
+.search-count {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+.date-range-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    white-space: nowrap;
+}
+.date-range-label input {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.85rem;
+}
+.limpiar-filtros-btn {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.limpiar-filtros-btn:hover { opacity: 0.8; }
+
+/* Barra de restauración de backup */
+.restore-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+.restore-bar select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+.restore-bar button {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Comparativa año anterior */
+.stats-comparison {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+.stats-comparison.up { color: #10b981; }
+.stats-comparison.down { color: #ef4444; }
+
+/* Cabeceras ordenables */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+th.sortable:hover { opacity: 0.8; }
+th.sortable .sort-arrow {
+    font-size: 0.75em;
+    opacity: 0.6;
+    margin-left: 4px;
+}
+
+/* Toast deshacer */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+.toast button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Sección plegable de estadísticas + gráfico */
+.stats-details {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+.stats-details summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 4px 0;
+    color: var(--text);
+    user-select: none;
+}
+.stats-details summary:hover { opacity: 0.85; }
+
+/* Resumen por activo */
+.stats-summary {
+    padding: 10px 0 4px;
+}
+.stats-line {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+.asset-chips-wrapper {
+    position: relative;
+}
+.asset-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 2px 4px 10px;
+    scrollbar-width: thin;
+}
+.asset-chips::-webkit-scrollbar { height: 5px; }
+.asset-chips::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* Fundido en los bordes para insinuar que hay más contenido al deslizar */
+.asset-chips-wrapper::before,
+.asset-chips-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 10px;
+    width: 24px;
+    pointer-events: none;
+    z-index: 1;
+}
+.asset-chips-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--card-bg), transparent);
+}
+.asset-chips-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--card-bg), transparent);
+}
+
+.asset-chip {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    min-width: 110px;
+}
+.asset-chip .asset-chip-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+.asset-chip .asset-chip-pct {
+    opacity: 0.65;
+    font-size: 0.8em;
+}
+.asset-chip > div:not(.asset-chip-top):not(.asset-chip-bar) {
+    margin-bottom: 6px;
+    font-size: 0.95em;
+}
+.asset-chip .asset-chip-bar {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--border);
+    overflow: hidden;
+}
+.asset-chip .asset-chip-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+/* Gráfico */
+.chart-wrapper {
+    overflow-x: auto;
+    padding-top: 6px;
+}
+.chart-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+    opacity: 0.75;
+    margin-bottom: 8px;
+}
+#spend-chart {
+    max-width: 100%;
+}
+
+.json-export-csv { background-color: #f59e0b; } /* naranja */
+
 /* Botón Borrar */
 .btn-delete {
     background: var(--danger);
@@ -249,8 +567,40 @@ th {
 
     /* Tabla ajustada */
     .table-wrapper {
-        margin: 0 -15px; 
+        margin: 0 -15px;
         border-radius: 0;
         width: calc(100% + 30px);
     }
+
+    /* Barra de búsqueda y filtros de fecha apilados */
+    .search-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-bar input[type="text"] { width: 100%; }
+    .date-range-label { justify-content: space-between; }
+    .search-count { text-align: center; }
+
+    /* Aviso de backup y restauración apilados */
+    .backup-banner, .restore-bar {
+        flex-direction: column;
+    }
+
+    /* Toast no se corta en pantallas estrechas */
+    .toast {
+        left: 15px;
+        right: 15px;
+        transform: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Landscape con poca altura (móvil apaisado): compactar secciones altas.
+   El alto real del canvas lo fija app.js (ajustarTamanoCanvas), no CSS,
+   para no desincronizar la resolución de dibujo con el tamaño mostrado. */
+@media (max-width: 900px) and (max-height: 420px) and (orientation: landscape) {
+    header { position: static; }
+    .form-container, .stats-details { padding: 10px; }
 }

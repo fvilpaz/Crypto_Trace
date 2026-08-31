@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CryptoTrace - Gestión de Activos Segura</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Estilo básico de seguridad para inputs */
@@ -15,19 +17,45 @@
 <body>
 
     <header>
-        <h1 id="theme-toggle" style="cursor: pointer; user-select: none;">🌓 CryptoTrace</h1>
-        </header>
+        <h1>CryptoTrace</h1>
+        <button type="button" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+    </header>
 
     <main>
         <div class="total-box">
-                <span><h2>Inversión Total:</h2></span>
+                <span><h2 id="total-label">Inversión Total:</h2></span>
                 <h2><strong id="total-general">0.00 €</strong></h2>
             </div>
+            <br>
+            <div class="year-tabs" id="year-tabs"></div>
+
+            <div id="backup-banner" class="backup-banner" style="display:none;">
+                <span>⚠️ Hace tiempo que no exportas tus datos.</span>
+                <button type="button" id="banner-export-btn">💾 Exportar ahora</button>
+            </div>
+
+            <div id="restore-bar" class="restore-bar" style="display:none;">
+                <span>🕒 Copia automática:</span>
+                <select id="restore-select"></select>
+                <button type="button" id="restore-btn">Restaurar</button>
+            </div>
+
+            <details id="stats-details" class="stats-details" open>
+                <summary>📊 Estadísticas y gráfico</summary>
+                <div id="stats-summary" class="stats-summary"></div>
+
+                <div class="chart-wrapper">
+                    <div id="chart-title" class="chart-title"></div>
+                    <canvas id="spend-chart" width="600" height="180"></canvas>
+                </div>
+            </details>
+
             <br>
             <div class="json-controls">
             <button id="import-btn" class="json-btn json-import">📂 Importar Datos</button>
             <input type="file" id="import-json" accept=".json" style="display:none;">
-            <button id="export-json" class="json-btn json-export">💾 Exportar Datos</button>
+            <button id="export-json" class="json-btn json-export">💾 Exportar JSON</button>
+            <button id="export-csv" class="json-btn json-export-csv">📄 Exportar CSV</button>
 
             <div class="currency-switch">
                 <span>EUR</span>
@@ -47,10 +75,13 @@
                        required maxlength="10" pattern="[a-zA-Z0-9]+" 
                        title="Solo letras y números, sin espacios." aria-label="Nombre del activo">
                 
-                <input type="number" id="input-euros" placeholder="Inversión €" 
+                <input type="number" id="input-euros" placeholder="Inversión €"
                        step="0.01" min="0" required aria-label="Cantidad invertida en Euros">
-                
-                <input type="number" id="input-cantidad" placeholder="Cantidad" 
+
+                <input type="number" id="input-comision" placeholder="Comisión €"
+                       step="0.01" min="0" aria-label="Comisión pagada en Euros">
+
+                <input type="number" id="input-cantidad" placeholder="Cantidad"
                        step="any" min="0" required aria-label="Cantidad de activo recibida">
                 
                 <button type="submit">Añadir</button>
@@ -58,15 +89,25 @@
             </form>
         </section>
 
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-moneda" placeholder="Buscar por moneda (ej. BTC)... ( / )">
+            <label class="date-range-label">Desde <input type="date" id="filtro-desde"></label>
+            <label class="date-range-label">Hasta <input type="date" id="filtro-hasta"></label>
+            <button type="button" id="limpiar-filtros" class="limpiar-filtros-btn" title="Limpiar filtros">✕</button>
+            <span id="search-count" class="search-count"></span>
+        </div>
+
         <section class="table-wrapper">
             <table id="main-table">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Moneda</th>
-                        <th>Inversión</th>
-                        <th>Cantidad</th>
-                        <th>Precio/U</th>
+                        <th class="sortable" data-sort="fecha">Fecha</th>
+                        <th class="sortable" data-sort="moneda">Moneda</th>
+                        <th class="sortable" data-sort="eur">Inversión</th>
+                        <th class="sortable" data-sort="comision">Comisión</th>
+                        <th class="sortable" data-sort="cantidad">Cantidad</th>
+                        <th class="sortable" data-sort="precio">Precio/U</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
@@ -76,6 +117,11 @@
         </section>
 
     </main>
+
+    <div id="toast" class="toast" style="display:none;">
+        <span id="toast-msg"></span>
+        <button type="button" id="toast-undo">Deshacer</button>
+    </div>
 
     <footer style="background: var(--card-bg); color: var(--text); text-align:center; padding:20px; border-radius:12px; margin-top:40px; font-size:0.9rem; border: 1px solid var(--border);">
     <p style="margin:5px 0; opacity: 0.8;">
