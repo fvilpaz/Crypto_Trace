@@ -67,6 +67,10 @@ const toastMsg = document.getElementById('toast-msg');
 const toastUndo = document.getElementById('toast-undo');
 const sortableHeaders = document.querySelectorAll('th.sortable');
 const statsDetails = document.getElementById('stats-details');
+const coinQuick = document.getElementById('coin-quick');
+const coinQuickChips = document.getElementById('coin-quick-chips');
+const coinDatalist = document.getElementById('coin-datalist');
+const inputMoneda = document.getElementById('input-moneda');
 
 // ==============================
 // FUNCIÓN PARA OBTENER TASA EN TIEMPO REAL
@@ -544,6 +548,48 @@ sortableHeaders.forEach((th) => {
 });
 
 // ==============================
+// SELECCIÓN RÁPIDA DE MONEDA (chips recurrentes + autocompletado)
+// ==============================
+function renderSeleccionRapida() {
+    // Cuenta compras por moneda para ordenar por recurrencia.
+    const conteo = new Map();
+    compras.forEach((c) => {
+        const m = (c.moneda || '').toUpperCase();
+        if (m) conteo.set(m, (conteo.get(m) || 0) + 1);
+    });
+
+    if (conteo.size === 0) {
+        coinQuick.style.display = 'none';
+        coinQuickChips.innerHTML = '';
+        coinDatalist.innerHTML = '';
+        return;
+    }
+
+    // Datalist: todas las monedas conocidas (autocompletado al teclear).
+    coinDatalist.innerHTML = [...conteo.keys()].sort()
+        .map((m) => `<option value="${escapeHtml(m)}"></option>`).join('');
+
+    // Chips: las más recurrentes primero (empate -> alfabético), top 8.
+    const top = [...conteo.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 8)
+        .map(([m]) => m);
+
+    coinQuick.style.display = 'flex';
+    coinQuickChips.innerHTML = top
+        .map((m) => `<button type="button" class="coin-quick-chip" data-moneda="${escapeHtml(m)}">${iconoActivo(m)}<span>${escapeHtml(m)}</span></button>`)
+        .join('');
+
+    coinQuickChips.querySelectorAll('.coin-quick-chip').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            inputMoneda.value = btn.dataset.moneda;
+            // Salta al importe para seguir metiendo la compra sin buscar el campo.
+            document.getElementById('input-euros').focus();
+        });
+    });
+}
+
+// ==============================
 // RENDER TABLA (CON EDITAR Y BORRAR)
 // ==============================
 function getAniosDisponibles() {
@@ -662,6 +708,7 @@ function render() {
     totalDisplay.textContent = formatMoney(totalAnioCompleto);
 
     actualizarBackupBanner();
+    renderSeleccionRapida();
     refrescarLogosSiHaceFalta();
 }
 

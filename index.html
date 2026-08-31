@@ -74,13 +74,18 @@
         </div>
 
         <section class="form-container">
+            <div id="coin-quick" class="coin-quick" style="display:none;">
+                <span class="coin-quick-label">Rápido:</span>
+                <div id="coin-quick-chips" class="coin-quick-chips"></div>
+            </div>
             <form id="crypto-form">
                 <input type="date" id="input-fecha" required aria-label="Fecha de inversión" placeholder="Fecha" >
-                
-                <input type="text" id="input-moneda" placeholder="Activo" 
-                       required maxlength="10" pattern="[a-zA-Z0-9]+" 
+
+                <input type="text" id="input-moneda" placeholder="Activo" list="coin-datalist"
+                       required maxlength="10" pattern="[a-zA-Z0-9]+"
                        title="Solo letras y números, sin espacios." aria-label="Nombre del activo">
-                
+                <datalist id="coin-datalist"></datalist>
+
                 <input type="number" id="input-euros" placeholder="Inversión €"
                        step="0.01" min="0" required aria-label="Cantidad invertida en Euros">
 
