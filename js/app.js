@@ -170,14 +170,27 @@ function marcarBackupHecho() {
     actualizarBackupBanner();
 }
 
+// Cada cuántos días sin exportar volvemos a mostrar el aviso (~2 meses).
+const DIAS_AVISO_BACKUP = 60;
+
 function actualizarBackupBanner() {
     if (compras.length === 0) {
         backupBanner.style.display = 'none';
         return;
     }
     const last = parseInt(localStorage.getItem('last_export_ts') || '0', 10);
-    const diasDesde = (Date.now() - last) / (1000 * 60 * 60 * 24);
-    backupBanner.style.display = (last === 0 || diasDesde > 7) ? 'flex' : 'none';
+    // Si nunca se ha exportado, medimos desde que la app tiene datos por
+    // primera vez (no desde 1970), para no avisar a alguien que acaba de empezar.
+    let referencia = last;
+    if (last === 0) {
+        referencia = parseInt(localStorage.getItem('first_data_ts') || '0', 10);
+        if (referencia === 0) {
+            referencia = Date.now();
+            localStorage.setItem('first_data_ts', referencia.toString());
+        }
+    }
+    const diasDesde = (Date.now() - referencia) / (1000 * 60 * 60 * 24);
+    backupBanner.style.display = diasDesde > DIAS_AVISO_BACKUP ? 'flex' : 'none';
 }
 
 bannerExportBtn.addEventListener('click', () => exportBtn.click());
@@ -720,6 +733,9 @@ importInput.addEventListener('change', (event) => {
                 crearBackup();
                 compras = importedData;
                 guardarEstado();
+                // Importar un archivo significa que ya tienes una copia de tus
+                // datos: cuenta como backup para no avisar en este dispositivo.
+                marcarBackupHecho();
                 anioActivo = 'todos';
                 render();
                 alert("Datos importados correctamente ✅");
