@@ -900,6 +900,32 @@ exportCsvBtn.addEventListener('click', () => {
     marcarBackupHecho();
 });
 
+function parsearCsv(texto) {
+    const lineas = texto.trim().split(/\r?\n/).filter(l => l.trim() !== '');
+    if (lineas.length === 0) return [];
+    const cabeceras = lineas[0].split(',').map(h => h.trim().toLowerCase());
+    const idx = {
+        fecha: cabeceras.indexOf('fecha'),
+        moneda: cabeceras.indexOf('moneda'),
+        eur: cabeceras.indexOf('euros'),
+        comision: cabeceras.indexOf('comision'),
+        cantidad: cabeceras.indexOf('cantidad')
+    };
+    const filas = lineas.slice(1).map(linea => {
+        const valores = linea.split(',');
+        const compra = { fecha: '', moneda: '', eur: 0, comision: 0, cantidad: 0 };
+        if (idx.fecha >= 0) compra.fecha = (valores[idx.fecha] || '').trim();
+        if (idx.moneda >= 0) compra.moneda = (valores[idx.moneda] || '').trim();
+        if (idx.eur >= 0) compra.eur = parseFloat(valores[idx.eur]) || 0;
+        if (idx.comision >= 0) compra.comision = parseFloat(valores[idx.comision]) || 0;
+        if (idx.cantidad >= 0) compra.cantidad = parseFloat(valores[idx.cantidad]) || 0;
+        return compra;
+    });
+    // Un CSV válido debe tener cabeceras reconocidas
+    if (idx.fecha < 0 && idx.eur < 0) throw new Error('CSV inválido');
+    return filas;
+}
+
 importBtn.addEventListener('click', () => {
     if (compras.length > 0) {
         const continuar = confirm('Esto sustituirá todos tus datos actuales por los del archivo. Exporta antes si quieres guardar una copia. ¿Continuar?');
@@ -915,7 +941,11 @@ importInput.addEventListener('change', (event) => {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
-            const importedData = JSON.parse(e.target.result);
+            const nombre = (file.name || '').toLowerCase();
+            const esCsv = nombre.endsWith('.csv');
+            const importedData = esCsv
+                ? parsearCsv(e.target.result)
+                : JSON.parse(e.target.result);
             if (Array.isArray(importedData)) {
                 crearBackup();
                 compras = importedData;
@@ -930,7 +960,7 @@ importInput.addEventListener('change', (event) => {
                 alert("Formato inválido ❌");
             }
         } catch (err) {
-            alert("Error leyendo el archivo JSON ❌");
+            alert("Error leyendo el archivo ❌");
         }
     };
     reader.readAsText(file);
