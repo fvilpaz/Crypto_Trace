@@ -147,6 +147,7 @@ let logoCache = JSON.parse(localStorage.getItem('coin_logos') || '{}');
 // Símbolos ya intentados en esta sesión (éxito o fallo) para no repetir peticiones
 // ni entrar en bucle render -> fetch -> render.
 const logosPedidos = new Set();
+let ultimoIntentoLogos = 0; // freno para no machacar la API si render() se dispara seguido
 
 // Color estable por ticker (hash -> hue) para el monograma de fallback.
 function colorMonograma(moneda) {
@@ -181,15 +182,19 @@ async function refrescarLogosSiHaceFalta() {
         .filter((s) => !(s in logoCache) && !logosPedidos.has(s));
 
     if (!symbols.length || !navigator.onLine) return;
+    // Freno: render() puede dispararse seguido (búsqueda, orden...). Evita machacar
+    // la API y, si hubo fallo (429/red), da margen antes de reintentar.
+    if (Date.now() - ultimoIntentoLogos < 8000) return;
+    ultimoIntentoLogos = Date.now();
     symbols.forEach((s) => logosPedidos.add(s));
 
     try {
         const lista = symbols.map((s) => s.toLowerCase()).join(',');
         const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&symbols=${lista}&include_tokens=top`;
         const resp = await fetch(url);
-        if (!resp.ok) return;
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await resp.json();
-        if (!Array.isArray(data)) return;
+        if (!Array.isArray(data)) throw new Error('respuesta no válida');
 
         let hayNuevos = false;
         data.forEach((item) => {
@@ -204,8 +209,11 @@ async function refrescarLogosSiHaceFalta() {
             render();
         }
     } catch (e) {
-        // Sin red o API caída: nos quedamos con los monogramas. No es crítico.
-        console.warn('No se pudieron obtener logos de CoinGecko:', e);
+        // Fallo (rate limit 429, red caída...): olvidamos que se pidieron para
+        // reintentar en la siguiente interacción (respetando el freno). Mientras,
+        // se ven los monogramas. No es crítico.
+        symbols.forEach((s) => logosPedidos.delete(s));
+        console.warn('No se pudieron obtener logos de CoinGecko (se reintentará):', e);
     }
 }
 
