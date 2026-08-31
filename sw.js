@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cryptotrace-v1';
+const CACHE_NAME = 'cryptotrace-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -25,12 +25,21 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Cache-first para el shell de la app; la llamada a la API del tipo de cambio va siempre a red.
+// Stale-while-revalidate para el shell: responde al instante con la caché y en
+// segundo plano baja la versión nueva para la próxima carga. Así los cambios sí
+// llegan al usuario sin borrar caché a mano. La API del tipo de cambio va a red.
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     if (url.origin !== self.location.origin) return; // deja pasar la API externa
 
     event.respondWith(
-        caches.match(event.request).then((cached) => cached || fetch(event.request))
+        caches.open(CACHE_NAME).then(async (cache) => {
+            const cached = await cache.match(event.request);
+            const red = fetch(event.request).then((resp) => {
+                if (resp && resp.status === 200) cache.put(event.request, resp.clone());
+                return resp;
+            }).catch(() => cached);
+            return cached || red; // instantáneo si hay caché; si no, espera a la red
+        })
     );
 });

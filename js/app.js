@@ -78,6 +78,9 @@ async function obtenerTasaReal() {
 
         if (data.result === "success") {
             tasaCambioReal = data.rates.USD;
+            // Guardamos la última tasa buena para poder mostrar USD correctamente
+            // offline (si no, el toggle USD caería a 1:1).
+            localStorage.setItem('last_rate_usd', tasaCambioReal);
             console.log(`Tasa actualizada: 1 EUR = ${tasaCambioReal} USD`);
             render();
         }
@@ -126,16 +129,32 @@ function gastoReal(c) {
 // ==============================
 // PERSISTENCIA + BACKUPS AUTOMÁTICOS
 // ==============================
+// Escapa texto de usuario antes de meterlo en innerHTML (evita XSS al importar).
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function guardarEstado() {
-    localStorage.setItem('crypto_data', JSON.stringify(compras));
+    try {
+        localStorage.setItem('crypto_data', JSON.stringify(compras));
+    } catch (e) {
+        alert('⚠️ No se pudieron guardar los datos (almacenamiento lleno). ' +
+              'Exporta un backup y libera espacio.');
+    }
 }
 
 function crearBackup() {
-    const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
-    // Copia profunda: si guardáramos la referencia, las mutaciones posteriores del array
-    // (push/splice) se reflejarían también en el backup ya guardado.
-    backups.unshift({ ts: Date.now(), data: JSON.parse(JSON.stringify(compras)) });
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(backups.slice(0, MAX_BACKUPS)));
+    try {
+        const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+        // Copia profunda: si guardáramos la referencia, las mutaciones posteriores del array
+        // (push/splice) se reflejarían también en el backup ya guardado.
+        backups.unshift({ ts: Date.now(), data: JSON.parse(JSON.stringify(compras)) });
+        localStorage.setItem(BACKUP_KEY, JSON.stringify(backups.slice(0, MAX_BACKUPS)));
+    } catch (e) {
+        // Un backup que falla no debe bloquear la operación principal (añadir/borrar).
+        console.warn('No se pudo crear el backup automático:', e);
+    }
 }
 
 function renderRestoreBar() {
@@ -363,7 +382,7 @@ function renderStats(comprasDelAnio) {
             const anchoBarra = maxPct > 0 ? (fraccion / maxPct) * 100 : 0;
             return `
                 <div class="asset-chip">
-                    <div class="asset-chip-top"><strong>${moneda}</strong><span class="asset-chip-pct">${pct}%</span></div>
+                    <div class="asset-chip-top"><strong>${escapeHtml(moneda)}</strong><span class="asset-chip-pct">${pct}%</span></div>
                     <div>${formatMoney(total)}</div>
                     <div class="asset-chip-bar"><div class="asset-chip-bar-fill" style="width:${anchoBarra}%"></div></div>
                 </div>
@@ -783,5 +802,8 @@ if ('serviceWorker' in navigator) {
 // ==============================
 // INICIALIZACIÓN
 // ==============================
+// Sembramos la última tasa conocida para que el toggle USD funcione offline
+// mientras (o si falla) la API responde.
+tasaCambioReal = parseFloat(localStorage.getItem('last_rate_usd')) || 1.0;
 obtenerTasaReal();
 render();

@@ -17,6 +17,12 @@
 <body>
 
     <header>
+        <a href="https://portafoliocrypto.netlify.app/" target="_blank" rel="noopener"
+           id="portfolio-link" title="Ir a mi cartera de inversiones">
+            <svg class="pl-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2.5"/><path d="M2 11h20"/><circle cx="17" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg>
+            <span>Mi Cartera</span>
+            <svg class="pl-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
         <h1>CryptoTrace</h1>
         <button type="button" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
     </header>
@@ -32,12 +38,6 @@
             <div id="backup-banner" class="backup-banner" style="display:none;">
                 <span>⚠️ Hace tiempo que no exportas tus datos.</span>
                 <button type="button" id="banner-export-btn">💾 Exportar ahora</button>
-            </div>
-
-            <div id="restore-bar" class="restore-bar" style="display:none;">
-                <span>🕒 Copia automática:</span>
-                <select id="restore-select"></select>
-                <button type="button" id="restore-btn">Restaurar</button>
             </div>
 
             <details id="stats-details" class="stats-details" open>
@@ -65,6 +65,12 @@
                 </label>
                 <span>USD</span>
             </div>
+        </div>
+
+        <div id="restore-bar" class="restore-bar" style="display:none;">
+            <span>🕒 Copia automática:</span>
+            <select id="restore-select"></select>
+            <button type="button" id="restore-btn">Restaurar</button>
         </div>
 
         <section class="form-container">

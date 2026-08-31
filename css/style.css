@@ -76,6 +76,33 @@ header h1 {
 }
 #theme-toggle:hover { opacity: 0.85; }
 
+#portfolio-link {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    text-decoration: none;
+    padding: 9px 15px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.45);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+#portfolio-link svg { display: block; }
+#portfolio-link .pl-arrow { opacity: 0.85; }
+#portfolio-link:hover {
+    transform: translateY(calc(-50% - 1px));
+    box-shadow: 0 6px 22px rgba(79, 70, 229, 0.6);
+}
+
 /* ==============================
    TOTAL DESTACADO (Arriba)
 ============================== */
@@ -548,6 +575,10 @@ th.sortable .sort-arrow {
 ============================== */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2rem; }
+
+    /* En móvil dejamos solo el icono de cartera para no chocar con el título */
+    #portfolio-link span, #portfolio-link .pl-arrow { display: none; }
+    #portfolio-link { padding: 8px 11px; gap: 0; }
 
     /* En móvil, los botones se apilan */
     .json-controls {
