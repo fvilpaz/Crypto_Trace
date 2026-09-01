@@ -375,6 +375,8 @@ function dibujarGrafico(labels, values, titulo) {
     if (titulo !== undefined) {
         ultimoGrafico = { labels, values, titulo };
     }
+    labels = ultimoGrafico.labels;
+    values = ultimoGrafico.values;
     chartTitle.textContent = ultimoGrafico.titulo;
 
     ajustarTamanoCanvas();
@@ -387,31 +389,82 @@ function dibujarGrafico(labels, values, titulo) {
     if (!values.length) return;
 
     const isDark = document.body.classList.contains('dark-theme');
+    const azul = '#2563eb';
+    const txt = isDark ? '#f8fafc' : '#1e293b';
+    const muted = isDark ? '#94a3b8' : '#64748b';
+    const linea = isDark ? '#334155' : '#e2e8f0';
+
+    const padTop = 22;      // hueco para el total de cada tramo arriba
+    const padBottom = 22;   // hueco para las etiquetas del eje X
+    const padX = 6;
     const max = Math.max(...values, 0.01);
-    const barGap = 8;
-    const barWidth = (w / values.length) - barGap;
-    const espacioEtiqueta = 18; // hueco reservado arriba para el importe de cada barra
-    const espacioEjeX = 20; // hueco reservado abajo para el nombre del mes/año
+    const plotH = h - padTop - padBottom;
+    const plotW = w - padX * 2;
+    const n = values.length;
 
+    const px = (i) => padX + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+    const py = (v) => padTop + plotH - (v / max) * plotH;
+
+    // "Agrupado" = varias barras comparten etiqueta (años en "todos"). Con un año
+    // activo cada punto es un mes distinto, así que no separamos ni totalizamos.
+    const agrupado = new Set(labels).size < n;
+
+    // Separadores verticales tenues solo entre tramos de año (si hay agrupación).
+    if (agrupado) {
+        ctx.strokeStyle = linea;
+        ctx.lineWidth = 1;
+        for (let i = 1; i < n; i++) {
+            if (labels[i] !== labels[i - 1]) {
+                const x = (px(i) + px(i - 1)) / 2;
+                ctx.beginPath();
+                ctx.moveTo(x, padTop);
+                ctx.lineTo(x, padTop + plotH);
+                ctx.stroke();
+            }
+        }
+    }
+
+    // Área degradada bajo la línea.
+    const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+    grad.addColorStop(0, isDark ? 'rgba(37,99,235,0.45)' : 'rgba(37,99,235,0.30)');
+    grad.addColorStop(1, 'rgba(37,99,235,0.02)');
+    ctx.beginPath();
+    ctx.moveTo(px(0), padTop + plotH);
+    values.forEach((v, i) => ctx.lineTo(px(i), py(v)));
+    ctx.lineTo(px(n - 1), padTop + plotH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Línea del gasto.
+    ctx.beginPath();
+    values.forEach((v, i) => { const x = px(i), y = py(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.strokeStyle = azul;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Puntos.
+    ctx.fillStyle = azul;
+    values.forEach((v, i) => { ctx.beginPath(); ctx.arc(px(i), py(v), 2.6, 0, Math.PI * 2); ctx.fill(); });
+
+    // Por cada tramo de etiqueta igual (año en "todos", mes en un año): la
+    // etiqueta centrada abajo y el total del tramo arriba.
     ctx.textAlign = 'center';
-
-    values.forEach((v, i) => {
-        const barHeight = (v / max) * (h - espacioEtiqueta - espacioEjeX);
-        const x = i * (barWidth + barGap) + barGap / 2;
-        const y = h - barHeight - espacioEjeX;
-
-        ctx.fillStyle = '#2563eb';
-        ctx.fillRect(x, y, barWidth, barHeight);
-
-        // Importe encima de la barra
-        ctx.font = 'bold 10px sans-serif';
-        ctx.fillStyle = isDark ? '#f8fafc' : '#1e293b';
-        ctx.fillText(formatMoney(v), x + barWidth / 2, y - 5);
-
-        // Etiqueta del eje X (mes o año)
-        ctx.font = '11px sans-serif';
-        ctx.fillText(labels[i], x + barWidth / 2, h - 5);
-    });
+    let start = 0;
+    for (let i = 1; i <= n; i++) {
+        if (i === n || labels[i] !== labels[start]) {
+            const cx = (px(start) + px(i - 1)) / 2;
+            ctx.font = '11px sans-serif';
+            ctx.fillStyle = muted;
+            ctx.fillText(labels[start], cx, h - 6);
+            let suma = 0;
+            for (let k = start; k < i; k++) suma += values[k];
+            ctx.font = 'bold 10px sans-serif';
+            ctx.fillStyle = txt;
+            ctx.fillText(formatMoney(suma), cx, 13);
+            start = i;
+        }
+    }
 }
 
 // ==============================
@@ -531,18 +584,19 @@ function renderStats(comprasDelAnio) {
         </div>
     `;
 
-    // Datos del gráfico: por año si estamos en "todos", por mes si hay un año activo
+    // Datos del gráfico: gasto MENSUAL siempre. En "todos" la etiqueta del eje
+    // es el año (se agrupa solo bajo cada tramo); con un año activo, el mes.
     let labels, values, titulo;
     if (anioActivo === 'todos') {
-        const porAnio = new Map();
+        const porYM = new Map();
         comprasDelAnio.forEach((c) => {
-            const a = (c.fecha || '').slice(0, 4);
-            porAnio.set(a, (porAnio.get(a) || 0) + gastoReal(c));
+            const ym = (c.fecha || '').slice(0, 7);   // YYYY-MM
+            if (ym.length === 7) porYM.set(ym, (porYM.get(ym) || 0) + gastoReal(c));
         });
-        const anios = [...porAnio.keys()].sort();
-        labels = anios;
-        values = anios.map((a) => porAnio.get(a));
-        titulo = 'Gasto por año';
+        const claves = [...porYM.keys()].sort();
+        labels = claves.map((ym) => ym.slice(0, 4));   // año (para el eje agrupado)
+        values = claves.map((ym) => porYM.get(ym));
+        titulo = 'Gasto mensual';
     } else {
         const porMes = new Map();
         comprasDelAnio.forEach((c) => {
@@ -1069,6 +1123,13 @@ function updateSyncStatus(kind, msg) {
     }
     const dot = document.getElementById('sync-btn');
     if (dot) dot.classList.toggle('sync-on', syncEnabled());
+    // Chivato en el título de la sección: verde "Sincronizado" / gris "Sin sincronizar".
+    const ind = document.getElementById('sync-indicator');
+    if (ind) {
+        const on = syncEnabled();
+        ind.classList.toggle('on', on);
+        ind.textContent = on ? 'Sincronizado' : 'Sin sincronizar';
+    }
 }
 
 function syncSchedulePush() {

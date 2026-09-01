@@ -851,6 +851,22 @@ body.dark-theme .kpi-ic.a { color: #fbbf24; }
 .json-sync.sync-on { background-color: #16a34a; } /* verde = conectado */
 .json-sync svg { display: block; }
 
+/* Chivato de estado de sync en el título de la sección */
+.sync-indicator {
+    float: right;
+    margin-top: 1px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    opacity: 0.6;
+    letter-spacing: 0.2px;
+}
+.sync-indicator::before { content: '● '; }
+.sync-indicator.on { color: #16a34a; border-color: #16a34a; opacity: 1; }
+
 /* Sección "Copias y sincronización" */
 .data-details .data-group { margin-top: 14px; }
 .data-details .data-group + .data-group { border-top: 1px solid var(--border); padding-top: 14px; }
