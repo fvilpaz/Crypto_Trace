@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cryptotrace-v2';
+const CACHE_NAME = 'cryptotrace-v3';
 const ASSETS = [
     './',
     './index.html',

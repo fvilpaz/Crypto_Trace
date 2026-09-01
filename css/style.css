@@ -830,3 +830,118 @@ body.dark-theme .kpi-ic.a { color: #fbbf24; }
     header { position: static; }
     .form-container, .stats-details { padding: 10px; }
 }
+
+/* ==============================
+   SYNC ENTRE DISPOSITIVOS
+   ============================== */
+.json-sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #6366f1; /* indigo */
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.json-sync:hover { opacity: 0.85; }
+.json-sync.sync-on { background-color: #16a34a; } /* verde = conectado */
+.json-sync svg { display: block; }
+
+/* Sección "Copias y sincronización" */
+.data-details .data-group { margin-top: 14px; }
+.data-details .data-group + .data-group { border-top: 1px solid var(--border); padding-top: 14px; }
+.data-group-title { font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; color: var(--text); }
+.data-group-desc { font-size: 0.8rem; opacity: 0.7; margin: 0 0 10px; line-height: 1.45; }
+
+.currency-switch.currency-switch-top {
+    width: fit-content;
+    margin: 10px auto 0;
+    justify-content: center;
+}
+
+.sync-ov {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.sync-box {
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    max-width: 440px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+.sync-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.sync-head h3 { margin: 0; font-size: 1.05rem; }
+.sync-x {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+}
+.sync-x:hover { opacity: 1; }
+.sync-desc {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--text);
+    opacity: 0.75;
+    margin: 0 0 14px;
+}
+.sync-desc a { color: var(--primary); }
+.sync-label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    display: block;
+    margin-bottom: 4px;
+}
+.sync-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+.sync-input:focus { outline: none; border-color: var(--primary); }
+.sync-status {
+    font-size: 0.75rem;
+    min-height: 16px;
+    margin: 8px 0 12px;
+    opacity: 0.7;
+}
+.sync-status.ok { color: #16a34a; opacity: 1; }
+.sync-status.error { color: var(--danger); opacity: 1; }
+.sync-status.working { color: #d97706; opacity: 1; }
+.sync-actions { display: flex; gap: 10px; }
+.sync-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+.sync-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.sync-secondary { background: var(--bg); color: var(--text); }

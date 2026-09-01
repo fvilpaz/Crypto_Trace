@@ -32,6 +32,14 @@
                 <span><h2 id="total-label">Inversión Total:</h2></span>
                 <h2><strong id="total-general">0.00 €</strong></h2>
             </div>
+            <div class="currency-switch currency-switch-top">
+                <span>EUR</span>
+                <label class="switch">
+                    <input type="checkbox" id="currency-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>USD</span>
+            </div>
             <br>
             <div class="year-tabs" id="year-tabs"></div>
 
@@ -50,28 +58,38 @@
                 </div>
             </details>
 
-            <br>
-            <div class="json-controls">
-            <button id="import-btn" class="json-btn json-import">📂 Importar Datos</button>
-            <input type="file" id="import-json" accept=".json,.csv" style="display:none;">
-            <button id="export-json" class="json-btn json-export">💾 Exportar JSON</button>
-            <button id="export-csv" class="json-btn json-export-csv">📄 Exportar CSV</button>
+            <details id="data-details" class="stats-details data-details">
+                <summary>🔒 Copias y sincronización</summary>
 
-            <div class="currency-switch">
-                <span>EUR</span>
-                <label class="switch">
-                    <input type="checkbox" id="currency-toggle">
-                    <span class="slider"></span>
-                </label>
-                <span>USD</span>
-            </div>
-        </div>
+                <div class="data-group">
+                    <div class="data-group-title">Sincronización entre dispositivos</div>
+                    <p class="data-group-desc">Guarda tus compras en un gist privado de GitHub y tenlas iguales en todos tus dispositivos, sin depender de este navegador.</p>
+                    <button type="button" id="sync-btn" class="json-sync" title="Sincronizar entre dispositivos (gist privado de GitHub)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        Sincronizar
+                    </button>
+                </div>
 
-        <div id="restore-bar" class="restore-bar" style="display:none;">
-            <span>🕒 Copia automática:</span>
-            <select id="restore-select"></select>
-            <button type="button" id="restore-btn">Restaurar</button>
-        </div>
+                <div class="data-group">
+                    <div class="data-group-title">Copia manual</div>
+                    <div class="json-controls">
+                        <button id="export-json" class="json-btn json-export">💾 Exportar JSON</button>
+                        <button id="export-csv" class="json-btn json-export-csv">📄 Exportar CSV</button>
+                        <button id="import-btn" class="json-btn json-import">📂 Importar</button>
+                        <input type="file" id="import-json" accept=".json,.csv" style="display:none;">
+                    </div>
+                </div>
+
+                <div class="data-group">
+                    <div class="data-group-title">Restaurar copia automática</div>
+                    <div id="restore-bar" class="restore-bar" style="display:none;">
+                        <span>🕒 Copia:</span>
+                        <select id="restore-select"></select>
+                        <button type="button" id="restore-btn">Restaurar</button>
+                    </div>
+                    <p class="data-group-desc" id="restore-empty">Se crean solas al añadir o borrar compras (guarda las últimas 5).</p>
+                </div>
+            </details>
 
         <section class="form-container">
             <div id="coin-quick" class="coin-quick" style="display:none;">
