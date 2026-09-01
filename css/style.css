@@ -608,9 +608,13 @@ th.sortable .sort-arrow {
 /* Tarjetas KPI (media mensual / coste medio / frecuencia) */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 12px;
+}
+/* Pantallas medias: 2+2 (nunca 3+1). El móvil ≤600px ya baja a 1 por fila. */
+@media (min-width: 601px) and (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .kpi-tile {
     background: var(--bg);
