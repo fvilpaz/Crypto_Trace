@@ -353,7 +353,18 @@ toastUndo.addEventListener('click', () => {
 // ==============================
 // GRÁFICO DE GASTO (canvas simple, sin librerías)
 // ==============================
-let ultimoGrafico = { labels: [], values: [], titulo: '' };
+let ultimoGrafico = { labels: [], values: [], titulo: '', meta: [], puntosX: [], puntosY: [] };
+let hoverIndex = null;   // índice del punto bajo el ratón (para el tooltip)
+
+function cajaRedondeada(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
 
 function ajustarTamanoCanvas() {
     // El canvas usa resolución real igual al ancho del contenedor, no un escalado CSS
@@ -371,12 +382,13 @@ function ajustarTamanoCanvas() {
     }
 }
 
-function dibujarGrafico(labels, values, titulo) {
+function dibujarGrafico(labels, values, titulo, meta) {
     if (titulo !== undefined) {
-        ultimoGrafico = { labels, values, titulo };
+        ultimoGrafico = { labels, values, titulo, meta: meta || [], puntosX: [], puntosY: [] };
     }
     labels = ultimoGrafico.labels;
     values = ultimoGrafico.values;
+    meta = ultimoGrafico.meta;
     chartTitle.textContent = ultimoGrafico.titulo;
 
     ajustarTamanoCanvas();
@@ -404,6 +416,10 @@ function dibujarGrafico(labels, values, titulo) {
 
     const px = (i) => padX + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
     const py = (v) => padTop + plotH - (v / max) * plotH;
+
+    // Guardo las posiciones de cada punto para el hover/tooltip.
+    ultimoGrafico.puntosX = values.map((v, i) => px(i));
+    ultimoGrafico.puntosY = values.map((v, i) => py(v));
 
     // "Agrupado" = varias barras comparten etiqueta (años en "todos"). Con un año
     // activo cada punto es un mes distinto, así que no separamos ni totalizamos.
@@ -465,7 +481,68 @@ function dibujarGrafico(labels, values, titulo) {
             start = i;
         }
     }
+
+    // Tooltip del punto bajo el ratón: guía vertical, punto resaltado y caja con
+    // el mes completo y el importe exacto.
+    if (hoverIndex !== null && hoverIndex >= 0 && hoverIndex < n && meta && meta.length) {
+        const hx = ultimoGrafico.puntosX[hoverIndex];
+        const hy = ultimoGrafico.puntosY[hoverIndex];
+
+        ctx.strokeStyle = muted;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(hx, padTop);
+        ctx.lineTo(hx, padTop + plotH);
+        ctx.stroke();
+
+        ctx.fillStyle = azul;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = isDark ? '#0f172a' : '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const l1 = meta[hoverIndex];
+        const l2 = formatMoney(values[hoverIndex]);
+        ctx.font = 'bold 12px sans-serif';
+        const tw = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 18;
+        const th = 36;
+        let bx = Math.max(2, Math.min(hx - tw / 2, w - tw - 2));
+        let by = hy - th - 10;
+        if (by < 0) by = hy + 10;
+
+        ctx.fillStyle = isDark ? '#0f172a' : '#ffffff';
+        ctx.strokeStyle = linea;
+        ctx.lineWidth = 1;
+        cajaRedondeada(ctx, bx, by, tw, th, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = muted;
+        ctx.font = '10px sans-serif';
+        ctx.fillText(l1, bx + tw / 2, by + 14);
+        ctx.fillStyle = txt;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(l2, bx + tw / 2, by + 29);
+    }
 }
+
+// Hover sobre el gráfico: encuentra el punto más cercano y repinta con tooltip.
+spendChart.addEventListener('mousemove', (e) => {
+    const xs = ultimoGrafico.puntosX;
+    if (!xs || !xs.length) return;
+    const rect = spendChart.getBoundingClientRect();
+    const escala = spendChart.width / rect.width;
+    const mx = (e.clientX - rect.left) * escala;
+    let best = 0, bestD = Infinity;
+    xs.forEach((x, i) => { const d = Math.abs(x - mx); if (d < bestD) { bestD = d; best = i; } });
+    if (best !== hoverIndex) { hoverIndex = best; dibujarGrafico(); }
+});
+spendChart.addEventListener('mouseleave', () => {
+    if (hoverIndex !== null) { hoverIndex = null; dibujarGrafico(); }
+});
 
 // ==============================
 // COMPARATIVA AÑO ANTERIOR
@@ -504,6 +581,24 @@ function calcularFrecuenciaDias(lista) {
     return spanDias / (lista.length - 1);
 }
 
+// Lista de meses "YYYY-MM" entre dos claves inclusive (para rellenar huecos a 0
+// y que el eje del gráfico sea un tiempo real, con sus valles).
+function mesesEntre(desde, hasta) {
+    const out = [];
+    let [y, m] = desde.split('-').map(Number);
+    const [yh, mh] = hasta.split('-').map(Number);
+    while (y < yh || (y === yh && m <= mh)) {
+        out.push(`${y}-${String(m).padStart(2, '0')}`);
+        m++; if (m > 12) { m = 1; y++; }
+    }
+    return out;
+}
+
+// "YYYY-MM" → "Ene 2025" (para los tooltips del gráfico).
+function etiquetaMes(ym) {
+    return `${NOMBRES_MES[parseInt(ym.slice(5), 10) - 1] || ym.slice(5)} ${ym.slice(0, 4)}`;
+}
+
 // ==============================
 // RESUMEN POR ACTIVO + MEDIA MENSUAL + COMPARATIVA
 // ==============================
@@ -526,7 +621,17 @@ function renderStats(comprasDelAnio) {
     const mediaMensual = totalAnio / (mesesSet.size || 1);
     const costeMedio = totalAnio / comprasDelAnio.length;
     const frecuencia = calcularFrecuenciaDias(comprasDelAnio);
-    const frecuenciaTxt = frecuencia === null ? '—' : `cada ${Math.round(frecuencia)} días`;
+    const frecuenciaTxt = frecuencia === null ? 'sin datos' : `cada ${Math.round(frecuencia)} días`;
+
+    // Mes de mayor gasto (para el KPI).
+    const porMesKpi = new Map();
+    comprasDelAnio.forEach((c) => {
+        const ym = (c.fecha || '').slice(0, 7);
+        if (ym.length === 7) porMesKpi.set(ym, (porMesKpi.get(ym) || 0) + gastoReal(c));
+    });
+    let mesTopYM = '', mesTopVal = 0;
+    porMesKpi.forEach((v, k) => { if (v > mesTopVal) { mesTopVal = v; mesTopYM = k; } });
+    const mesTopTxt = mesTopYM ? etiquetaMes(mesTopYM) : 'sin datos';
 
     const comp = calcularComparativaAnual();
     let comparisonHtml = '';
@@ -578,37 +683,44 @@ function renderStats(comprasDelAnio) {
                 <div class="kpi-ic a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
                 <div><div class="kpi-lab">Frecuencia</div><div class="kpi-val">${frecuenciaTxt}</div></div>
             </div>
+            <div class="kpi-tile">
+                <div class="kpi-ic b"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+                <div><div class="kpi-lab">Mayor gasto · ${mesTopTxt}</div><div class="kpi-val">${formatMoney(mesTopVal)}</div></div>
+            </div>
         </div>
         <div class="asset-chips-wrapper">
             <div class="asset-chips">${chips}</div>
         </div>
     `;
 
-    // Datos del gráfico: gasto MENSUAL siempre. En "todos" la etiqueta del eje
-    // es el año (se agrupa solo bajo cada tramo); con un año activo, el mes.
-    let labels, values, titulo;
+    // Datos del gráfico: gasto MENSUAL siempre, con huecos rellenos a 0 (eje
+    // temporal fiel). En "todos" la etiqueta del eje es el año (se agrupa bajo
+    // cada tramo); con un año activo, el mes. `meta` = etiqueta completa por
+    // punto (Ene 2025) para el tooltip al pasar el ratón.
+    const porYM = new Map();
+    comprasDelAnio.forEach((c) => {
+        const ym = (c.fecha || '').slice(0, 7);
+        if (ym.length === 7) porYM.set(ym, (porYM.get(ym) || 0) + gastoReal(c));
+    });
+    let labels, values, meta, titulo;
     if (anioActivo === 'todos') {
-        const porYM = new Map();
-        comprasDelAnio.forEach((c) => {
-            const ym = (c.fecha || '').slice(0, 7);   // YYYY-MM
-            if (ym.length === 7) porYM.set(ym, (porYM.get(ym) || 0) + gastoReal(c));
-        });
         const claves = [...porYM.keys()].sort();
-        labels = claves.map((ym) => ym.slice(0, 4));   // año (para el eje agrupado)
-        values = claves.map((ym) => porYM.get(ym));
+        const meses = mesesEntre(claves[0], claves[claves.length - 1]);
+        labels = meses.map((ym) => ym.slice(0, 4));   // año (para el eje agrupado)
+        values = meses.map((ym) => porYM.get(ym) || 0);
+        meta = meses.map(etiquetaMes);
         titulo = 'Gasto mensual';
     } else {
-        const porMes = new Map();
-        comprasDelAnio.forEach((c) => {
-            const m = (c.fecha || '').slice(5, 7);
-            porMes.set(m, (porMes.get(m) || 0) + gastoReal(c));
-        });
-        const meses = [...porMes.keys()].sort();
-        labels = meses.map((m) => NOMBRES_MES[parseInt(m, 10) - 1] || m);
-        values = meses.map((m) => porMes.get(m));
+        const hoy = new Date();
+        const ultimoMes = Number(anioActivo) === hoy.getFullYear() ? hoy.getMonth() + 1 : 12;
+        const meses = [];
+        for (let m = 1; m <= ultimoMes; m++) meses.push(`${anioActivo}-${String(m).padStart(2, '0')}`);
+        labels = meses.map((ym) => NOMBRES_MES[parseInt(ym.slice(5), 10) - 1]);
+        values = meses.map((ym) => porYM.get(ym) || 0);
+        meta = meses.map(etiquetaMes);
         titulo = `Gasto por mes en ${anioActivo}`;
     }
-    dibujarGrafico(labels, values, titulo);
+    dibujarGrafico(labels, values, titulo, meta);
 }
 
 // ==============================
@@ -1127,8 +1239,12 @@ function updateSyncStatus(kind, msg) {
     const ind = document.getElementById('sync-indicator');
     if (ind) {
         const on = syncEnabled();
+        const cfgInd = getSync();
         ind.classList.toggle('on', on);
         ind.textContent = on ? 'Sincronizado' : 'Sin sincronizar';
+        ind.title = on
+            ? (cfgInd.lastSync ? 'Última sync: ' + new Date(cfgInd.lastSync).toLocaleTimeString('es-ES') : 'Conectado')
+            : 'Abre la sección para conectar';
     }
 }
 
@@ -1272,3 +1388,16 @@ const syncBtnEl = document.getElementById('sync-btn');
 if (syncBtnEl) syncBtnEl.addEventListener('click', openSyncModal);
 updateSyncStatus(syncEnabled() ? 'ok' : '');
 if (syncEnabled()) syncPull();   // al arrancar, baja lo último de la nube
+
+// Auto-sync: al volver a la pestaña/ventana, baja lo último (throttle 3s) para
+// ver los cambios hechos en otro dispositivo sin recargar.
+let lastAutoPull = 0;
+function autoPull() {
+    if (!syncEnabled()) return;
+    const ahora = Date.now();
+    if (ahora - lastAutoPull < 3000) return;
+    lastAutoPull = ahora;
+    syncPull();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) autoPull(); });
+window.addEventListener('focus', autoPull);
