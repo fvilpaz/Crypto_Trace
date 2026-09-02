@@ -119,12 +119,11 @@ actualizarIconoTema();
 // ==============================
 function formatMoney(valor) {
     if (isNaN(valor)) valor = 0;
-    const finalVal = enUSD ? valor * tasaCambioReal : valor;
-
-    return finalVal.toLocaleString('es-ES', {
-        style: 'currency',
-        currency: enUSD ? 'USD' : 'EUR'
-    });
+    if (enUSD) {
+        const finalVal = valor * tasaCambioReal;
+        return '$' + finalVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return valor.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 }
 
 function gastoReal(c) {
