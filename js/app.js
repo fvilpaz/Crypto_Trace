@@ -1277,7 +1277,7 @@ async function syncPush() {
     }
 }
 
-async function syncPull() {
+async function syncPull(force = false) {
     const cfg = getSync();
     if (!cfg.token || !cfg.gistId) return;
     updateSyncStatus('working');
@@ -1289,7 +1289,7 @@ async function syncPull() {
         if (!file) { updateSyncStatus('ok'); return; }
         const content = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
         const data = JSON.parse(content);
-        if ((data.updatedAt || 0) > storeVersion) {
+        if (force || (data.updatedAt || 0) > storeVersion) {
             applyRemote(data);
             anioActivo = 'todos';
             render();
@@ -1378,7 +1378,7 @@ function openSyncModal() {
         catch { /* el estado ya muestra el error */ }
     });
     const nowBtn = ov.querySelector('#sync-now-btn');
-    if (nowBtn) nowBtn.addEventListener('click', async () => { await syncPull(); await syncPush(); });
+    if (nowBtn) nowBtn.addEventListener('click', async () => { await syncPull(true); await syncPush(); });
     const disconnectBtn = ov.querySelector('#sync-disconnect-btn');
     if (disconnectBtn) disconnectBtn.addEventListener('click', () => { syncDisconnect(); close(); });
 }
