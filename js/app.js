@@ -1386,7 +1386,7 @@ function openSyncModal() {
 const syncBtnEl = document.getElementById('sync-btn');
 if (syncBtnEl) syncBtnEl.addEventListener('click', openSyncModal);
 updateSyncStatus(syncEnabled() ? 'ok' : '');
-if (syncEnabled()) syncPull();   // al arrancar, baja lo último de la nube
+if (syncEnabled()) syncPull(true);   // al arrancar, baja siempre lo último de la nube
 
 // Auto-sync: al volver a la pestaña/ventana, baja lo último (throttle 3s) para
 // ver los cambios hechos en otro dispositivo sin recargar.
@@ -1396,7 +1396,7 @@ function autoPull() {
     const ahora = Date.now();
     if (ahora - lastAutoPull < 3000) return;
     lastAutoPull = ahora;
-    syncPull();
+    syncPull(true);   // fuerza siempre para no perder cambios del otro dispositivo
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) autoPull(); });
 window.addEventListener('focus', autoPull);
