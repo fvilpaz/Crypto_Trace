@@ -1,10 +1,13 @@
-const CACHE_NAME = 'cryptotrace-v5';
+const CACHE_NAME = 'cryptotrace-v6';
 const ASSETS = [
     './',
     './index.html',
     './css/style.css',
     './js/app.js',
     './manifest.json',
+    './favicon.ico',
+    './icons/favicon-16.png',
+    './icons/favicon-32.png',
     './icons/icon-192.png',
     './icons/icon-512.png'
 ];
