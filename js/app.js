@@ -1188,6 +1188,9 @@ render();
 // Usa un archivo distinto al del portafolio para no colisionar con el mismo token.
 const SYNC_KEY = 'cryptoTrace.sync';
 const GIST_FILE = 'crypto-trace.json';
+// Marca de "hay cambios en este navegador que aún no han llegado al gist".
+// Mientras exista, bajar del gist NO pisa lo local: primero se sube.
+const PENDING_KEY = 'crypto_data_pending';
 let pushTimer = null;
 
 const getSync = () => {
@@ -1196,6 +1199,7 @@ const getSync = () => {
 };
 const setSync = (obj) => localStorage.setItem(SYNC_KEY, JSON.stringify(obj));
 const syncEnabled = () => !!getSync().token;
+const syncPending = () => localStorage.getItem(PENDING_KEY) === '1';
 const gistHeaders = (token) => ({
     'Authorization': `Bearer ${token}`,
     'Accept': 'application/vnd.github+json',
@@ -1222,6 +1226,8 @@ function applyRemote(data) {
 }
 
 function updateSyncStatus(kind, msg) {
+    const pendiente = syncEnabled() && syncPending();
+    if (kind === 'ok' && pendiente) kind = 'pending';   // "ok" solo si no queda nada por subir
     const el = document.getElementById('sync-status');
     if (el) {
         const cfg = getSync();
@@ -1230,17 +1236,22 @@ function updateSyncStatus(kind, msg) {
         el.textContent = kind === 'ok' ? `Sincronizado ${when ? '· ' + when : ''}`
             : kind === 'error' ? `Error de sync: ${msg || ''}`
             : kind === 'working' ? 'Sincronizando…'
+            : kind === 'pending' ? 'Pendiente de subir'
             : '';
     }
     const dot = document.getElementById('sync-btn');
     if (dot) dot.classList.toggle('sync-on', syncEnabled());
-    // Chivato en el título de la sección: verde "Sincronizado" / gris "Sin sincronizar".
+    // Chivato en el título de la sección: verde "Sincronizado" solo si la última
+    // subida/bajada salió bien y no queda nada por subir; gris en el resto.
     const ind = document.getElementById('sync-indicator');
     if (ind) {
         const on = syncEnabled();
         const cfgInd = getSync();
-        ind.classList.toggle('on', on);
-        ind.textContent = on ? 'Sincronizado' : 'Sin sincronizar';
+        ind.classList.toggle('on', on && !pendiente && kind !== 'error');
+        ind.textContent = !on ? 'Sin sincronizar'
+            : pendiente ? 'Pendiente de subir'
+            : kind === 'error' ? 'Error de sync'
+            : 'Sincronizado';
         ind.title = on
             ? (cfgInd.lastSync ? 'Última sync: ' + new Date(cfgInd.lastSync).toLocaleTimeString('es-ES') : 'Conectado')
             : 'Abre la sección para conectar';
@@ -1249,6 +1260,7 @@ function updateSyncStatus(kind, msg) {
 
 function syncSchedulePush() {
     if (!syncEnabled()) return;
+    localStorage.setItem(PENDING_KEY, '1');   // queda pendiente hasta que la subida salga bien
     clearTimeout(pushTimer);
     pushTimer = setTimeout(() => { syncPush(); }, 1500);
 }
@@ -1257,6 +1269,7 @@ async function syncPush() {
     const cfg = getSync();
     if (!cfg.token) return;
     updateSyncStatus('working');
+    const subida = storeVersion;   // versión que sale en esta subida
     const content = JSON.stringify(buildSyncState(), null, 2);
     try {
         const url = cfg.gistId ? `https://api.github.com/gists/${cfg.gistId}` : 'https://api.github.com/gists';
@@ -1271,6 +1284,8 @@ async function syncPush() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const gist = await res.json();
         setSync({ ...cfg, gistId: gist.id, lastSync: Date.now() });
+        // Si se guardó algo mientras subía, sigue pendiente (ya hay otra subida programada).
+        if (storeVersion === subida) localStorage.removeItem(PENDING_KEY);
         updateSyncStatus('ok');
     } catch (e) {
         updateSyncStatus('error', e.message);
@@ -1280,6 +1295,8 @@ async function syncPush() {
 async function syncPull(force = false) {
     const cfg = getSync();
     if (!cfg.token || !cfg.gistId) return;
+    // Con cambios locales sin subir no se baja encima: se suben primero.
+    if (syncPending()) { await syncPush(); return; }
     updateSyncStatus('working');
     try {
         const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, { headers: gistHeaders(cfg.token) });
@@ -1289,7 +1306,8 @@ async function syncPull(force = false) {
         if (!file) { updateSyncStatus('ok'); return; }
         const content = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
         const data = JSON.parse(content);
-        if (force || (data.updatedAt || 0) > storeVersion) {
+        // syncPending() otra vez: pudo guardarse algo mientras llegaba la respuesta.
+        if (!syncPending() && (force || (data.updatedAt || 0) > storeVersion)) {
             applyRemote(data);
             anioActivo = 'todos';
             render();
@@ -1332,6 +1350,7 @@ async function syncConnect(token) {
 
 function syncDisconnect() {
     localStorage.removeItem(SYNC_KEY);
+    localStorage.removeItem(PENDING_KEY);
     clearTimeout(pushTimer);
     updateSyncStatus('');
 }
